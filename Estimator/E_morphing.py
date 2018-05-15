@@ -7,16 +7,16 @@ import numpy as np
 from keras.layers import Lambda, Concatenate, Multiply, Reshape
 import keras.backend as K
 
-from higgs_inference import settings
+import settings
 
 ################################################################################
 # Morphing
 ################################################################################
 
 # Load morphing data
-sample_component = np.load(settings.base_dir + '/data/morphing/components_fakebasis2.npy')[:, 1:]  # Ignore bkgrd. comp
+sample_component = np.load(settings.base_dir + '/Data/components_fakebasis2.npy')[:, 1:]  # Ignore bkgrd. comp
 component_sample = np.linalg.inv(sample_component)
-sigma_sample = np.load(settings.base_dir + '/data/morphing/fakebasis2_xsecs.npy')
+sigma_sample = np.load(settings.base_dir + '/Data/fakebasis2_xsecs.npy')
 sigma_component = component_sample.dot(sigma_sample)
 
 

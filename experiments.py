@@ -1,25 +1,29 @@
-################################################################################
-# Imports
-################################################################################
 from __future__ import absolute_import, division, print_function
 import argparse
 import logging
 from os import sys, path
 base_dir = path.abspath(path.join(path.dirname(__file__), '..'))
 
-from higgs_inference.various.neyman_construction import start_cl_calculation
-from higgs_inference.strategies.truth import truth_inference
-from higgs_inference.strategies.afc import afc_inference
-from higgs_inference.strategies.histograms import histo_inference
+try:
+    import settings
+except ImportError:
+    if base_dir in sys.path:
+        raise
+    sys.path.append(base_dir)
+    import settings
+
+from various.neyman_construction import start_cl_calculation
+from Strategy.truth import truth_inference
+from Strategy.afc import afc_inference
+from Strategy.histograms import histo_inference
 
 try:
-    from higgs_inference.strategies.parameterized import parameterized_inference
-    from higgs_inference.strategies.point_by_point import point_by_point_inference
-    from higgs_inference.strategies.score_regression import score_regression_inference
-
+    from Strategy.S_param import parameterized_inference
+    from Strategy.S_PbP import point_by_point_inference
+    #from Strategy.S_score_regress import score_regression_inference
     loaded_ml_strategies = True
-
 except ImportError:
+    print('didnt load, puta')
     loaded_ml_strategies = False
 
 ################################################################################
@@ -29,35 +33,45 @@ except ImportError:
 settings.base_dir = base_dir
 
 # Set up logging
-logging.basicConfig(format='%(asctime)s %(levelname)s    %(message)s', level=logging.DEBUG, datefmt='%d.%m.%Y %H:%M:%S')
-logging.info('Hi! How are you today?')
+logging.basicConfig(format='%(asctime)s %(levelname)s    %(message)s',
+                    level=logging.DEBUG, datefmt='%H:%M:%S')
+logging.info('Holiii! Cómo estás hoy?')
 
 # Parse arguments
-parser = argparse.ArgumentParser(description='Inference experiments for Higgs EFT measurements')
+parser = argparse.ArgumentParser(
+        description='Inference experiments for Higgs EFT measurements')
 
-parser.add_argument('algorithm', help='Algorithm type. Options are "p" or "cl" for the calculation of p values '
-                                      + 'through the Neyman construction; "truth", "localmodel", '
-                                      + '"afc", "histo", "carl", "score" (in the carl setup), '
-                                      + '"combined" (carl + score), "regression", "combinedregression" '
-                                      + '(regression + score), or "scoreregression" (regresses on the score and '
-                                      + 'performs density estimation on theta times score.')
+parser.add_argument(
+        'algorithm',
+        help='Algorithm type. Options are "p" or "cl" for the calculation of p values '+\
+             'through the Neyman construction; "truth", "localmodel", '+\
+             '"afc", "histo", "carl", "score" (in the carl setup), '+\
+             '"combined" (carl + score), "regression", "combinedregression" '+\
+             '(regression + score), or "scoreregression" (regresses on the score and '+\
+             'performs density estimation on theta times score.')
 parser.add_argument("-pbp", "--pointbypoint", action="store_true",
                     help="Point-by-point rather than parameterized setup.")
 parser.add_argument("-a", "--aware", action="store_true",
                     help="Physics-aware parameterized setup.")
-parser.add_argument("-s", "--smearing", action='store_true', help='Train and evaluate on smeared observables.')
-parser.add_argument("-t", "--training", default='baseline', help='Training sample: "baseline", "basis", or "random".')
+parser.add_argument("-s", "--smearing", action='store_true',
+                    help='Train and evaluate on smeared observables.')
+parser.add_argument("-t", "--training", default='baseline',
+                    help='Training sample: "baseline", "basis", or "random".')
 parser.add_argument("-x", "--xindices", type=int, nargs='+', default=[1, 38, 39, 40, 41],
                     help='X components to be used for histograms and AFC.')
-parser.add_argument("--alpha", type=float, default=None, help='Factor scaling the score regression loss in the'
-                                                              + ' parameterized combined approaches.')
+parser.add_argument("--alpha", type=float, default=None,
+                    help='Factor scaling the score regression loss in the'+\
+                         ' parameterized combined approaches.')
 parser.add_argument("--epsilon", type=float, default=None, help='Epsilon for AFC')
 parser.add_argument("-d", "--denom", type=int, default=0,
-                    help='Chooses one of five reference thetas for the denominator of the likelihood ratio.')
+                    help='Chooses one of five reference thetas for the'+\
+                         'denominator of the likelihood ratio.')
 parser.add_argument("--neyman", action='store_true',
                     help='Calculate toy experiments for the Neyman construction.')
-parser.add_argument("--samplesize", type=int, default=None, help='Number of samples in training sample')
-parser.add_argument("-o", "--options", nargs='+', default='', help="Further options to be passed on to the algorithm.")
+parser.add_argument("--samplesize", type=int, default=None,
+                    help='Number of samples in training sample')
+parser.add_argument("-o", "--options", nargs='+', default='',
+                    help="Further options to be passed on to the algorithm.")
 
 args = parser.parse_args()
 
@@ -140,4 +154,4 @@ else:
                             training_sample_size=args.samplesize,
                             options=args.options)
 
-logging.info("That's it -- have a great day!")
+logging.info("Terminado -- ten un buen día!")

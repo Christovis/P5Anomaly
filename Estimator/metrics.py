@@ -8,7 +8,7 @@
 from keras import backend as K
 from keras import losses
 
-from higgs_inference import settings
+import settings
 
 
 ################################################################################

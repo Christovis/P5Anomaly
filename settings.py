@@ -6,11 +6,11 @@ import numpy as np
 ################################################################################
 # Directories
 ################################################################################
-base_dir = '/home/jb6504/higgs_inference'  # Will be overridden at startup
+base_dir = '/home/chrbecker/Documents/CDT_Project/Code'  # Will be overridden at startup
 
 # Large directories, on scratch on cluster
-weighted_events_dir = '/scratch/jb6504/higgs_inference/data/events'
-unweighted_events_dir = '/scratch/jb6504/higgs_inference/data/unweighted_events'
+weighted_events_dir = '/scratch/jb6504/higgs_inference/Data/events'
+unweighted_events_dir = '/scratch/jb6504/higgs_inference/Data/unweighted_events'
 neyman_dir = '/scratch/jb6504/higgs_inference/results/neyman'
 
 ################################################################################
@@ -39,10 +39,10 @@ epsilon = 1.e-3  # for various numerical accuracy issues
 ################################################################################
 
 try:
-    thetas = np.load(base_dir + '/data/thetas/thetas_parameterized.npy')
+    thetas = np.load(base_dir + '/Data/thetas_parameterized.npy')
 except IOError:
     base_dir = '../'
-    thetas = np.load(base_dir + '/data/thetas/thetas_parameterized.npy')
+    thetas = np.load(base_dir + '/Data/thetas_parameterized.npy')
 
 n_thetas = len(thetas)
 n_thetas_roam = 101

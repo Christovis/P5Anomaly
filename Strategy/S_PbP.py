@@ -17,10 +17,10 @@ from keras.callbacks import EarlyStopping, LearningRateScheduler
 from carl.ratios import ClassifierScoreRatio
 from carl.learning import CalibratedClassifierScoreCV
 
-from higgs_inference import settings
-from higgs_inference.various.utils import calculate_mean_squared_error
-from higgs_inference.models.models_point_by_point import make_classifier, make_regressor
-from higgs_inference.models.ml_utils import DetailedHistory
+import settings
+from various.utils import calculate_mean_squared_error
+from Estimator.E_PbP import make_classifier, make_regressor
+from Estimator.E_ml_utils import DetailedHistory
 
 
 def point_by_point_inference(algorithm='carl',

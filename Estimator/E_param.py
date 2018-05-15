@@ -5,24 +5,17 @@ SM: Standard Model
 """
 
 from keras.models import Model
-from keras.layers import Input, Dense, Lambda, Concatenate, Multiply, Reshape \
-                         ActivityRegularization, Activation, Add
+from keras.layers import Input, Dense, Lambda, Concatenate, Multiply, Reshape, ActivityRegularization, Activation, Add
 from keras import optimizers
 import keras.backend as K
 
 import settings
-from Estimator.ml_utils import build_hidden_layers
-from Estimator.loss_functions import loss_function_carl, \
-                                     loss_function_combined, \
-                                     loss_function_combinedregression, \
-                                     loss_function_ratio_regression, \
-                                     loss_function_score
-from Estimator.metrics import full_cross_entropy, full_mse_log_r, \
-                                     full_mse_score
+from Estimator.E_ml_utils import build_hidden_layers
+from Estimator.loss_func import loss_function_carl, loss_function_combined, loss_function_combinedregression, loss_function_ratio_regression, loss_function_score
+from Estimator.metrics import full_cross_entropy, full_mse_log_r, full_mse_score
 from Estimator.metrics import full_mae_log_r, full_mae_score
-from Estimator.metrics import trimmed_cross_entropy, trimmed_mse_log_r, \
-                              trimmed_mse_score
-from Estimator.morphing import generate_wi_layer, generate_wtilde_layer
+from Estimator.metrics import trimmed_cross_entropy, trimmed_mse_log_r, trimmed_mse_score
+from Estimator.E_morphing import generate_wi_layer, generate_wtilde_layer
 
 metrics = [full_cross_entropy, trimmed_cross_entropy,
            full_mse_log_r, trimmed_mse_log_r,
@@ -180,9 +173,12 @@ def make_combined_regressor(n_hidden_layers=3,
     s_hat_layer = Lambda(lambda x: 1. / (1. + x))(r_hat_layer)
 
     # Score
-    gradient_layer = Lambda(lambda x: K.gradients(x[0], x[1])[0],
-                            output_shape=(settings.n_thetas_features,))([log_r_hat_layer, input_layer])
-    score_layer = Lambda(lambda x: x[:, -settings.n_params:], output_shape=(settings.n_params,))(gradient_layer)
+    gradient_layer = Lambda(lambda x:
+            K.gradients(x[0], x[1])[0],
+            output_shape=(settings.n_thetas_features,))([log_r_hat_layer, input_layer])
+    score_layer = Lambda(lambda x: 
+            x[:, -settings.n_params:],
+            output_shape=(settings.n_params,))(gradient_layer)
 
     # Combine outputs
     output_layer = Concatenate()([s_hat_layer, log_r_hat_layer, score_layer])
@@ -191,8 +187,9 @@ def make_combined_regressor(n_hidden_layers=3,
     # Compile model
     model.compile(loss=lambda x, y: loss_function_combinedregression(x, y, alpha=alpha),
                   metrics=metrics,
-                  optimizer=optimizers.Adam(lr=learning_rate, decay=lr_decay, clipnorm=10.))
-
+                  optimizer=optimizers.Adam(lr=learning_rate,
+                                            decay=lr_decay,
+                                            clipnorm=10.))
     return model
 
 

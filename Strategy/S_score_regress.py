@@ -1,6 +1,3 @@
-mports
-################################################################################
-
 from __future__ import absolute_import, division, print_function
 
 import logging
@@ -15,9 +12,9 @@ from keras.callbacks import EarlyStopping, LearningRateScheduler
 
 from carl.learning.calibration import HistogramCalibrator, NDHistogramCalibrator
 
-from higgs_inference import settings
-from higgs_inference.models.models_score_regression import make_regressor
-from higgs_inference.various.utils import r_from_s, calculate_mean_squared_error
+import settings
+from Estimator.E_score_regression import make_regressor
+from various.utils import r_from_s, calculate_mean_squared_error
 
 
 def score_regression_inference(use_smearing=False,
