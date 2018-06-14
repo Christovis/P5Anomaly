@@ -76,8 +76,7 @@ def beta_l(q, m_l):
 
 def N(q, M, P):
    con = np.sqrt(P['G_f']**2*P['alpha_em']**2*q*np.sqrt(lmb(q, M))*beta_l(q, M['m_l']) / \
-                 (3*2.**10*np.pi**5*M['m_B']**3))
-   con *= P['V_tbV_ts']
+                 (3*2.**10*np.pi**5*M['m_B']**3)) * P['V_tbV_ts']
    return con
 
 
@@ -141,6 +140,8 @@ def A_t(q, FF, WC, M, P):
 
 ###Angular obervables
 def J_1s(q, FF, WC, M, P):
+    # https://arxiv.org/pdf/1005.0571.pdf
+    # equ. 2.4a
     J = ((2+beta_l(q, M['m_l'])**2)/4.) * \
         (np.absolute(A_ort(q, "L", FF, WC, M, P))**2 + \
          np.absolute(A_par(q, "L", FF, WC, M, P))**2 + \
@@ -154,6 +155,8 @@ def J_1s(q, FF, WC, M, P):
 
 
 def J_1c(q, FF, WC, M, P):
+    # https://arxiv.org/pdf/1005.0571.pdf
+    # equ. 2.4b
     J = np.absolute(A_0(q, "L", FF, WC, M, P))**2 + np.absolute(A_0(q, "R", FF, WC, M, P))**2 + \
         (4*(M['m_l']**2)/q) * (np.absolute(A_t(q, FF, WC, M, P))**2 + \
                           2*(A_0(q, "L", FF, WC, M, P)*np.conj(A_0(q, "R", FF, WC, M, P))).real)
@@ -161,6 +164,8 @@ def J_1c(q, FF, WC, M, P):
 
 
 def J_2s(q, FF, WC, M, P):
+    # https://arxiv.org/pdf/1005.0571.pdf
+    # equ. 2.4c
     J = ((beta_l(q, M['m_l'])**2)/4) * (np.absolute(A_ort(q, "L", FF, WC, M, P))**2 + \
                                         np.absolute(A_par(q, "L", FF, WC, M, P))**2 + \
                                         np.absolute(A_ort(q, "R", FF, WC, M, P))**2 + \
@@ -169,12 +174,16 @@ def J_2s(q, FF, WC, M, P):
 
 
 def J_2c(q, FF, WC, M, P):
+    # https://arxiv.org/pdf/1005.0571.pdf
+    # equ. 2.4d
     J = -(beta_l(q, M['m_l'])**2) * (np.absolute(A_0(q, "L", FF, WC, M, P))**2 + \
                                      np.absolute(A_0(q, "R", FF, WC, M, P))**2)
     return J
 
 
 def J_5(q, FF, WC, M, P):
+    # https://arxiv.org/pdf/1005.0571.pdf
+    # equ. 2.4g
     J = np.sqrt(2)*beta_l(q, M['m_l']) * \
         ((A_0(q, "L", FF, WC, M, P)*np.conj(A_ort(q, "L", FF, WC, M, P))).real - \
          (A_0(q, "R", FF, WC, M, P)*np.conj(A_ort(q, "R", FF, WC, M, P))).real)
@@ -235,12 +244,15 @@ def DecayRate_bar(q, FF, WC, M, P):
 
 
 def S5(q, FF, WC, M, P):
-    s_5 = (J_5_bar(q, FF, WC, M, P) + J_5(q, FF, WC, M, P)) / \
+    # https://arxiv.org/pdf/1207.2753.pdf
+    # footnote 2, page 7
+    s_5 = (J_5(q, FF, WC, M, P) + J_5_bar(q, FF, WC, M, P)) / \
           (DecayRate(q, FF, WC, M, P) + DecayRate_bar(q, FF, WC, M, P))
     return s_5
 
 
 def FL(q, FF, WC, M, P):
+    # longitudinal polarization fraction
     con = (np.absolute(A_0(q, "L", FF, WC, M, P))**2 + 
            np.absolute(A_0(q, "R", FF, WC, M, P))**2) / \
           (np.absolute(A_0(q, "L", FF, WC, M, P))**2 + \
@@ -253,4 +265,8 @@ def FL(q, FF, WC, M, P):
 
 
 def P_5_p(q, FF, WC, M, P):
-    return(S5(q, FF, WC, M, P)/(np.sqrt(FL(q, FF, WC, M, P)*(1-FL(q, FF, WC, M, P)))))
+    # https://arxiv.org/pdf/1207.2753.pdf
+    # equ. 18
+    FT = 1 - FL(q, FF, WC, M, P)
+    P5 = S5(q, FF, WC, M, P)/(np.sqrt(FL(q, FF, WC, M, P)*FT))
+    return P5
