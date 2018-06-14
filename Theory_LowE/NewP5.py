@@ -366,8 +366,8 @@ for i in range(len(bins)):
 measur=['LHCb B->K*mumu 2015 P 0.1-0.98',
         'LHCb B->K*mumu 2015 P 1.1-2.5',
         'LHCb B->K*mumu 2015 P 2.5-4',
-        'LHCb B->K*mumu 2015 P 4-6',
-        'ATLAS B->K*mumu 2017 P5p' ]
+        'LHCb B->K*mumu 2015 P 4-6']
+        #'ATLAS B->K*mumu 2017 P5p' ]
 fpl.bin_plot_exp('<P5p>(B0->K*mumu)',
                  col_dict= {'ATLAS': 'y', 'LHCb': 'g'},
                  divide_binwidth=False,
@@ -376,4 +376,5 @@ fpl.bin_plot_exp('<P5p>(B0->K*mumu)',
 plt.xlabel('$q^2 \hspace{2pt} (GeV^2)$')
 plt.ylabel('$P5 \hspace{2pt} (q^2)$')
 plt.legend()
+plt.ylim(-1.2, 0.7)
 plt.savefig('Fig1_NewP5.png', bbox_inches='tight')
