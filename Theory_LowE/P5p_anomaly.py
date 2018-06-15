@@ -17,13 +17,14 @@ mu_b= 4.8
 m_B= 5.27950 #GeV from 1207.2753 pg.13
 m_Ks= 0.895 #GeV from 1207.2753 pg.13
 mu_h=2.2
-f_B=180 #+-30 MeV
-f_Ks= 225 # +-
-lambda_B_p= 3 (+- 1 GeV**-1)
+f_B=0.180 #+-30 MeV
+f_Ks= 0.220 # +-
+f_Ks_ort= 0.163
+lambda_B_p= 3 # (+- 1 GeV**-1)
 C_F=4/3
 
-alpha_s_h=
-alpha_s_b=
+alpha_s_h= 0.28
+alpha_s_b= 0.2
 alpha_em= 1/128 #at m_Z +- 0.0007
 V_tbV_ts= 0.0428
 G_f= 1.166378* 10**(-5) #GeV**-2
@@ -51,25 +52,12 @@ SM_WC = { 'dC7' : 0.,
           'dC10' : 0.}
 
 
-# New parametrization of form factors from Patricia Bell, Ali et. al.
 
-# Central vlaues of the FF parameters for A_1, A_2 and V
-FormFac = {'F_0' : [0.337 , 0.282 , 0.457],
-           'c1' : [0.602 , 1.172 , 1.482],
-           'c2' : [0.258 , 0.567 , 1.015],
-           'c3' : [0.0 , 0.0 , 0.0]}
+def E_Ks(q):
+    return ((m_B/2) * (1- (q/(m_B**2))))
 
-#Maximum allowed FF parameters
-FormFacmax = {'F_0' : [0.385 , 0.320 , 0.548],
-              'c1' : [0.557 , 1.083 , 1.462],
-              'c2' :[0.068 , 0.393 , 0.953],
-              'c3' : [0.0 , 0.0 , 0.0]}
 
-# Minimumallowed FF parameters
-FormFacmin = {'F_0' : [0.294 , 0.246 , 0.399],
-              'c1' : [0.656 , 1.237 , 1.537],
-              'c2' : [0.456 , 0.822 , 1.123],
-              'c3' : [0.0 , 0.0 , 0.0]}
+#Definition of the two form factors ksi.
 
 
 #ksi parameters
@@ -77,13 +65,18 @@ FormFacmin = {'F_0' : [0.294 , 0.246 , 0.399],
 ksi_ort_0 = 0.35  # +- 0.008 (Straub et. al.)
 ksi_par_0 = 2* m_Ks* 0.47 /m_B # +- 0.032 (same)
 
+def ksi_ort(q):  #from arXiv hep-ph/0106067v2
+    return( ksi_ort_0*(1/(1 - q/(m_B**2) )))
 
 
-def E_Ks(q):
-    return ((m_B/2) * (1- (q/(m_B**2))))
+def ksi_par(q):
+    return( ksi_par_0*(1/(1-q/(m_B**2)))**3 )
 
 
-# O(alpha_s) and O(Lambda/m_b) corrections
+# NLO formfactors corrections parameters
+
+
+#O(Lambda/m_b) corrections
 
 Lmb_corr_par= { 'V'  : [0.,     0.,    0.],  # a_F, b_F, c_F in KMPW scheme from arXiv 1407.8526v2
                'A0' : [0.002, 0.590, 1.473],
@@ -96,18 +89,56 @@ Lmb_corr_par= { 'V'  : [0.,     0.,    0.],  # a_F, b_F, c_F in KMPW scheme from
 res = []
 
 def Delta_lmb(q, par):
-    for i in ['V', 'A0', 'A1', 'A2', 'T1', 'T2', 'T3']:
+    for i in ['V', 'A1', 'A2', 'A0', 'T1', 'T2', 'T3']:
         val = par[i][0] + par[i][1]*(q/m_B**2) + par[i][2]*(q**2/m_B**4)
         res.append(val)
     return(res)
 
+
+# O(alpha_s) corrections
+
+a_FF_par = { 'a_par' : [ 0.17, 0.05, -0.17, 0.05], #a_1_par and a_2_par for K_bar and K decays from
+             'a_ort' : [ 0.18, 0.03, -0.18, -.03]}        #arXiv 9805422v2
+
+
+def Phi_par(u, par):
+    return(6*u*(1-u)*(1 + 3*par['a_par'][0]*(2*u-1) +\
+                      par['a_par'][1]*3/2 * (5*(2*u-1)**2-1) ))
+   
+def Phi_ort(u, par):
+    return(6*u*(1-u)*(1 + 3*par['a_ort'][0]*(2*u-1) +\
+                      par['a_ort'][1]*3/2 * (5*(2*u-1)**2-1) ))
+
+
+factor_par= integrate.quad(Phi_par, 0, 1, args=(a_FF_par))
+
+factor_ort= integrate.quad(Phi_ort, 0, 1, args=(a_FF_par))
+
+
+deltaF_par= 8*(np.pi**2)*f_B*f_Ks/(3*m_B)*(factor_par[0]*lambda_B_p)
+
+deltaF_ort= 8*(np.pi**2)*f_B*f_Ks_ort/(3*m_B)*(factor_ort[0]*lambda_B_p)
+
+
+
+def deltaT1(q):
+    return( m_B/(4*E_Ks(q)) * deltaF_par)
+
+def deltaT2(q):
+    return( 1/2 * deltaF_ort)
+
+def deltaT3(q):
+    return( deltaT1(q) + 2*m_Ks/m_B*(m_B/(2*E_Ks(q)))**2 * deltaF_par )
+
+
 def L(q):
-    return(- 2*E_Ks(q)/(m_B-2*E_Ks(q)) * np.log*(2*E_Ks(q)/m_B))
+    return(- 2*E_Ks(q)/(m_B-2*E_Ks(q)) * np.log(2*E_Ks(q)/m_B))
+
+
 
 def Delta(q):
     return(1 +  alpha_s_b *C_F/(4*np.pi)*(-2 + 2*L(q)) - alpha_s_b*C_F*2*q/E_Ks(q)**2 /(np.pi) *\
-           np.pi**2 * m_Ks*f_B*f_Ks*lambda_B_p/ (3*m_B*E_Ks(q)*ksi_par(q)) * factor)
-
+           np.pi**2 * m_Ks*f_B*f_Ks*lambda_B_p/ (3*m_B*E_Ks(q)*ksi_par(q)) * factor_par[0])
 
 def Delta_V(q):
     return(0.)
@@ -115,26 +146,34 @@ def Delta_V(q):
 def Delta_A1(q):
     return(0.)
 
-def Deltra_A2(q):
+def Delta_A2(q):
     return(0.)
 
 def Delta_A0(q):
-    return((E_Ks(q)/m_Ks)*ksi_par(q)*(1/Delta(q) - 1))
+    return((E_Ks(q)/m_Ks)*ksi_par(q)*(Delta(q)**-1- 1))
 
 def Delta_T1(q):
-    return(C_F*alpha_s*ksi_ort(q)*(np.log(m_b**2/mu_b**2) - L(q)) +\
+    return(C_F*alpha_s_b*ksi_ort(q)*(np.log(m_b**2/mu_b**2) - L(q)) +\
            C_F*alpha_s_b*deltaT1(q)  )
 
 def Delta_T2(q):
-    return(C_F*alpha_s*2*E_Ks(q)/(m_B)*ksi_ort(q)*(np.log(m_b**2/mu_b**2) - L(q)) +\
+    return(C_F*alpha_s_b*2*E_Ks(q)/(m_B)*ksi_ort(q)*(np.log(m_b**2/mu_b**2) - L(q)) +\
            C_F*alpha_s_h*deltaT2(q)  )
 
 def Delta_T3(q):
-    return(C_F*alpha_s*(ksi_ort(q)*(np.log(m_b**2/mu_b**2) - L(q)) -\
-                        ksi_par(q)(np.log(m_b**2/mu_b**2) + 2*L(q))) +\
+    return(C_F*alpha_s_b*(ksi_ort(q)*(np.log(m_b**2/mu_b**2) - L(q)) -\
+                        ksi_par(q)*(np.log(m_b**2/mu_b**2) + 2*L(q))) +\
            C_F*alpha_s_h*deltaT3(q)  )
 
-'''
+
+corr = { 'V' : [Delta_V,  Delta_lmb ],
+         'A1': [Delta_A1, Delta_lmb ],
+         'A2': [Delta_A2, Delta_lmb ],
+         'A0': [Delta_A0, Delta_lmb ],
+         'T1': [Delta_T1, Delta_lmb ],
+         'T2': [Delta_T2, Delta_lmb ],
+         'T3': [Delta_T3, Delta_lmb ]}
+
 ###############################################################################
 
 #In the low q regime (q<< m_B^2) we have: NB we use q in place of q^2.
@@ -145,12 +184,12 @@ def Delta_T3(q):
 def h(q, m):
     z = 4*m**2/q
     if m==0:
-        con = -4/9*(-np.log(m_b**2)-2/3-z) - \
+        con = -4/9*(-np.log(mu_b**2)-2/3-z) - \
               4/9*(2+z)*np.sqrt(np.absolute(z-1)) * \
               (np.log(2) - 1/2*np.log(4/q) - np.pi * 1j/2)
         return con
     else:
-        con = -4/9*(np.log(m**2/m_b**2)-2/3-z) - \
+        con = -4/9*(np.log(m**2/mu_b**2)-2/3-z) - \
               4/9*(2+z)*np.sqrt(np.absolute(z-1))*np.arctan(1/np.sqrt(z-1))
         return con
 
@@ -162,38 +201,38 @@ def Y(q, m_b, m_c):
     return con
 
 
+#Definition of the seven full form factors with NLO corrections
 
-#Definition of the two form factors ksi.
+def V(q, corr):
+    return( (m_B + m_Ks)/m_B * ksi_ort(q) +\
+            corr['V'][0](q) + corr['V'][1](q, Lmb_corr_par)[0])
+  
+def A1(q,  corr):
+    return((2* E_Ks(q))/(m_B + m_Ks)*ksi_ort(q) +\
+           corr['A1'][0](q) + corr['A1'][1](q, Lmb_corr_par)[1])
 
-def ksi_ort(q, FF):  #from arXiv hep-ph/0106067v2
-    return( ksi_ort_0*(1/(1 - q/(m_B**2) )))
+def A2(q,  corr):
+    return(m_B/(m_B-m_Ks)*(ksi_ort(q) - ksi_par(q)) +\
+           corr['A2'][0](q) + corr['A2'][1](q, Lmb_corr_par)[2])
 
-def ksi_par(q, FF):
-    return( ksi_par_0*(1/(1-q/(m_B**2)))**3 )
+def A0(q,  corr):
+    return((E_Ks(q)/m_Ks)*ksi_par(q) +\
+           corr['A0'][0](q) + corr['A0'][1](q, Lmb_corr_par)[3])
+
+def T1(q,  corr):
+    return(ksi_ort(q) +\
+           corr['T1'][0](q) + corr['T1'][1](q, Lmb_corr_par)[4])
+
+def T2(q,  corr):
+    return((2* E_Ks(q))/m_B*ksi_ort(q) +\
+           corr['T2'][0](q) + corr['T2'][1](q, Lmb_corr_par)[5])
+
+def T3(q,  corr):
+    return(ksi_ort(q) - ksi_par(q) +\
+           corr['T3'][0](q) + corr['T3'][1](q, Lmb_corr_par)[6])
 
 
-#Definition of the seven full form factors
-
-def V(q, FF, corr):
-    return( (m_B + m_Ks)/m_B * ksi_ort(q, FF) + corr['V'][0] + corr['V'][1])
-
-def A1(q, FF, corr):
-    return((2* E_Ks)/(m_B + m_Ks)*ksi_ort(q, FF) + corr['A1'][0] + corr['A1'][1])
-
-def A2(q, FF, corr):
-    return(m_B/(m_B-m_Ks)*(ksi_ort(q, FF) - ksi_par(q, FF)) + corr['A2'][0] + corr['A2'][1])
-
-def A0(q, FF, corr):
-    return((E_ks/m_Ks)*ksi_par(q, FF) + corr['A0'][0] + corr['A0'][1] )
-
-def T1(q, FF, corr):
-    return(ksi_ort(q, FF) + corr['T1'][0] + corr['T1'][1])
-
-def T2(q, FF, corr):
-    return((2* E_ks)/m_B*ksi_ort(q, FF) + corr['T2'][0] + corr['T2'][1])
-
-def T3(q, FF, corr):
-    return(ksi_ort(q, FF) - ksi_par(q, FF) + corr['T3'][0] + corr['T3'][1])
+print( V(2,  corr),  A0(2,  corr),  A1(2,  corr),  A2(2,  corr),  T1(2,  corr),  T2(2,  corr),  T3(2,  corr))
 
 
 ##Factors needed for the amplitudes
@@ -212,152 +251,161 @@ def N(q):
 
 ##Amplitudes (arXiv 0807.2589v3)
 
-def A_ort(q, chir, FF, corr, NP):
+def A_ort(q, chir, NP, corr):
     if chir == 'L':
         res = np.sqrt(2*lmb(q))*N(q) * \
-              ((C9 + NP['dC9'] + Y(q, m_b, m_c) - (C10 + NP['dC10']) )*V(q, FF, corr)/(m_B + m_Ks) + \
-                ((2*m_b)/q) * (C7_eff + NP['dC7'])*T1(q, FF, corr))
+              ((C9 + NP['dC9'] + Y(q, m_b, m_c) - (C10 + NP['dC10']) )*V(q,  corr)/(m_B + m_Ks) + \
+                ((2*m_b)/q) * (C7_eff + NP['dC7'])*T1(q,  corr))
         return res
     elif chir == 'R':
         res = np.sqrt(2*lmb(q))*N(q) * \
-              ((C9 + NP['dC9'] + Y(q, m_b, m_c) + (C10 + NP['dC10']) )*V(q, FF, corr)/(m_B + m_Ks) + \
-                ((2*m_b)/q) * (C7_eff + NP['dC7'])*T1(q, FF, corr))
+              ((C9 + NP['dC9'] + Y(q, m_b, m_c) + (C10 + NP['dC10']) )*V(q,  corr)/(m_B + m_Ks) + \
+                ((2*m_b)/q) * (C7_eff + NP['dC7'])*T1(q,  corr))
         return res
     else:
         print("Invalid chirality argument")
 
-        
-def A_par(q, chir, FF, corr, NP):
+def A_par(q, chir,  NP, corr):
     if chir == 'L':
-        res = -np.sqrt(2)*N(q)*(m_B**2 = m_Ks**2)*\
-            ((C9 + NP['dC9'] + Y(q, m_b, m_c)) - (C10 + NP['dC10']))*A1(q, FF, corr)/(m_B - m_Ks) +\
-            ((2*m_b)/q) * (C7_eff + NP['dC7']) * T2(q, FF, corr)
+        res = -np.sqrt(2)*N(q)*(m_B**2 - m_Ks**2)*\
+            ((C9 + NP['dC9'] + Y(q, m_b, m_c)) - (C10 + NP['dC10']))*A1(q,  corr)/(m_B - m_Ks) +\
+            ((2*m_b)/q) * (C7_eff + NP['dC7']) * T2(q,  corr)
         return res
     elif chir == 'R':
-       res = -np.sqrt(2)*N(q)*(m_B**2 = m_Ks**2)*\
-            ((C9 + NP['dC9'] + Y(q, m_b, m_c)) + (C10 + NP['dC10']))*A1(q, FF, corr)/(m_B - m_Ks) +\
-            ((2*m_b)/q) * (C7_eff + NP['dC7']) * T2(q, FF, corr)
-        return res
+       res = -np.sqrt(2)*N(q)*(m_B**2 - m_Ks**2)*\
+            ((C9 + NP['dC9'] + Y(q, m_b, m_c)) + (C10 + NP['dC10']))*A1(q,  corr)/(m_B - m_Ks) +\
+            ((2*m_b)/q) * (C7_eff + NP['dC7']) * T2(q,  corr)
+       return res
     else:
         print("Invalid chirality argument")
 
 
-def A_0(q, chir, FF, corr, NP):
+def A_0(q, chir, NP, corr):
     if chir == 'L':
         res = -N(q)/(2.*m_Ks*np.sqrt(q)) * \
             ( ((C9 + NP['dC9'] +Y(q, m_b, m_c)) - (C10 + NP['dC10']))* ((m_B**2 - m_Ks**2 -q)*\
-             (m_B + m_Ks)*A1(q, FF, corr) - lmb(q)* A2(q, FF, corr)/(m_B + m_Ks)) +\
-             (2*m_b)*(C7_eff + NP['dC7']) * ((m_B**2 + 3*m_Ks**2-q)*T2(q, FF, corr) -\
-                                             (lmb/(m_B**2-m_Ks**2))*T3(q, FF, corr))) \
+             (m_B + m_Ks)*A1(q,  corr) - lmb(q)* A2(q,  corr)/(m_B + m_Ks)) +\
+             (2*m_b)*(C7_eff + NP['dC7']) * ((m_B**2 + 3*m_Ks**2-q)*T2(q,  corr) -\
+                                             (lmb(q)/(m_B**2-m_Ks**2))*T3(q,  corr))) 
         return res
     elif chir == 'R':
         res = -N(q)/(2.*m_Ks*np.sqrt(q)) * \
               ( ((C9 + NP['dC9'] +Y(q, m_b, m_c)) + (C10 + NP['dC10']))* ((m_B**2 - m_Ks**2 -q)*\
-                (m_B + m_Ks)*A1(q, FF, corr) - lmb(q)* A2(q, FF, corr)/(m_B + m_Ks)) +\
-                (2*m_b)*(C7_eff + NP['dC7']) * ((m_B**2 + 3*m_Ks**2-q)*T2(q, FF, corr) -\
-                                                (lmb/(m_B**2-m_Ks**2))*T3(q, FF, corr))) \
-        else:
+                (m_B + m_Ks)*A1(q,  corr) - lmb(q)* A2(q,  corr)/(m_B + m_Ks)) +\
+                (2*m_b)*(C7_eff + NP['dC7']) * ((m_B**2 + 3*m_Ks**2-q)*T2(q,  corr) -\
+                                                (lmb(q)/(m_B**2-m_Ks**2))*T3(q,  corr))) 
+        return res
+    else:
         print("Invalid chirality argument")
 
+
+#print(A_ort(2, 'L', SM_WC, corr))
+#print(A_par(2, 'L', SM_WC, corr))
+#print(A_0(2, 'L', SM_WC, corr))
         
-def A_t(q, FF, corr, NP):
-    res =( (N(q)*np.sqrt(lmb))/np.sqrt(q) * (2* C10+ NP['dC10'])*A0(q, FF, corr))
+
+        
+
+
+        
+def A_t(q,  NP, corr):
+    res =( (N(q)*np.sqrt(lmb(q)))/np.sqrt(q) * (2* C10+ NP['dC10'])*A0(q,  corr))
     return(res)
 
 
 ###Angular obervables
-def J_1s(q, FF, NP, corr):
-    J = ((2+beta_l(q)**2)/4.) * (np.absolute(A_ort(q, "L", FF, NP, corr))**2 + \
-                                 np.absolute(A_par(q, "L", FF, NP, corr))**2 + \
-                                 np.absolute(A_ort(q, "R", FF, NP, corr))**2 + \
-                                 np.absolute(A_par(q, "R", FF, NP, corr))**2) + \
-        ((4*(m_l**2))/q) * (A_ort(q, "L", FF, NP, corr) * np.conj(A_ort(q, "R", FF, NP, corr)) +  \
-                            A_par(q, "L", FF, NP, corr) * np.conj(A_par(q, "R", FF, NP, corr))).real
+def J_1s(q,  NP, corr):
+    J = ((2+beta_l(q)**2)/4.) * (np.absolute(A_ort(q, "L",  NP, corr))**2 + \
+                                 np.absolute(A_par(q, "L",  NP, corr))**2 + \
+                                 np.absolute(A_ort(q, "R",  NP, corr))**2 + \
+                                 np.absolute(A_par(q, "R",  NP, corr))**2) + \
+        ((4*(m_l**2))/q) * (A_ort(q, "L",  NP, corr) * np.conj(A_ort(q, "R",  NP, corr)) +  \
+                            A_par(q, "L",  NP, corr) * np.conj(A_par(q, "R",  NP, corr))).real
     return J
 
 
-def J_1c(q, FF, NP, corr):
-    J = np.absolute(A_0(q, "L", FF, NP, corr))**2 + np.absolute(A_0(q, "R", FF, NP, corr))**2 + \
-        (4*(m_l**2)/q) * (np.absolute(A_t(q, FF, NP, corr))**2 + \
-                          2*(A_0(q, "L", FF, NP, corr)*np.conj(A_0(q, "R", FF, NP, corr))).real)
+def J_1c(q,  NP, corr):
+    J = np.absolute(A_0(q, "L",  NP, corr))**2 + np.absolute(A_0(q, "R",  NP, corr))**2 + \
+        (4*(m_l**2)/q) * (np.absolute(A_t(q,  NP, corr))**2 + \
+                          2*(A_0(q, "L",  NP, corr)*np.conj(A_0(q, "R",  NP, corr))).real)
     return J
 
 
-def J_2s(q, FF, NP, corr):
-    J = ((beta_l(q)**2)/4) * (np.absolute(A_ort(q, "L", FF, NP, corr))**2 + \
-                              np.absolute(A_par(q, "L", FF, NP, corr))**2 + \
-                              np.absolute(A_ort(q, "R", FF, NP, corr))**2 + \
-                              np.absolute(A_par(q, "R", FF, NP, corr))**2)
+def J_2s(q,  NP, corr):
+    J = ((beta_l(q)**2)/4) * (np.absolute(A_ort(q, "L",  NP, corr))**2 + \
+                              np.absolute(A_par(q, "L",  NP, corr))**2 + \
+                              np.absolute(A_ort(q, "R",  NP, corr))**2 + \
+                              np.absolute(A_par(q, "R",  NP, corr))**2)
     return J
 
 
-def J_2c(q, FF, NP, corr):
-    J = -(beta_l(q)**2) * (np.absolute(A_0(q, "L", FF, NP, corr))**2 + \
-                           np.absolute(A_0(q, "R", FF, NP, corr))**2)
+def J_2c(q,  NP, corr):
+    J = -(beta_l(q)**2) * (np.absolute(A_0(q, "L",  NP, corr))**2 + \
+                           np.absolute(A_0(q, "R",  NP, corr))**2)
     return J
 
 
-def J_5(q, FF, NP, corr):
-    J = np.sqrt(2)*beta_l(q)*((A_0(q, "L", FF, NP, corr)*np.conj(A_ort(q, "L", FF, NP, corr))).real - \
-                              (A_0(q, "R", FF, NP, corr)*np.conj(A_ort(q, "R", FF, NP, corr))).real)
+def J_5(q,  NP, corr):
+    J = np.sqrt(2)*beta_l(q)*((A_0(q, "L",  NP, corr)*np.conj(A_ort(q, "L",  NP, corr))).real - \
+                              (A_0(q, "R",  NP, corr)*np.conj(A_ort(q, "R",  NP, corr))).real)
     return J
 
 
-def J_1s_bar(q, FF, NP, corr):
-    J = ((2+beta_l(q)**2)/4.) * (np.absolute(A_ort(q, "L", FF, NP, corr))**2 + \
-                                 np.absolute(A_par(q, "L", FF, NP, corr))**2 + \
-                                 np.absolute(A_ort(q, "R", FF, NP, corr))**2 + \
-                                 np.absolute(A_par(q, "R", FF, NP, corr))**2) + \
-        ((4* m_l**2)/q) * (A_ort(q, "R", FF, NP, corr)*np.conj(A_ort(q, "L", FF, NP, corr)) + \
-                           A_par(q, "R", FF, NP, corr)*np.conj(A_par(q, "L", FF, NP, corr))).real
+def J_1s_bar(q,  NP, corr):
+    J = ((2+beta_l(q)**2)/4.) * (np.absolute(A_ort(q, "L",  NP, corr))**2 + \
+                                 np.absolute(A_par(q, "L",  NP, corr))**2 + \
+                                 np.absolute(A_ort(q, "R",  NP, corr))**2 + \
+                                 np.absolute(A_par(q, "R",  NP, corr))**2) + \
+        ((4* m_l**2)/q) * (A_ort(q, "R",  NP, corr)*np.conj(A_ort(q, "L",  NP, corr)) + \
+                           A_par(q, "R",  NP, corr)*np.conj(A_par(q, "L",  NP, corr))).real
     return J
 
 
-def J_1c_bar(q, FF, NP, corr):
-    J = np.absolute(A_0(q, "L", FF, NP, corr))**2 + np.absolute(A_0(q, "R", FF, NP, corr))**2 + \
-        (4*m_l**2/q)*(np.absolute(A_t(q, FF, NP, corr))**2 + \
-                      2*(A_0(q, "R", FF, NP, corr)*np.conj(A_0(q,"L", FF, NP, corr))).real)
+def J_1c_bar(q,  NP, corr):
+    J = np.absolute(A_0(q, "L",  NP, corr))**2 + np.absolute(A_0(q, "R",  NP, corr))**2 + \
+        (4*m_l**2/q)*(np.absolute(A_t(q,  NP, corr))**2 + \
+                      2*(A_0(q, "R",  NP, corr)*np.conj(A_0(q,"L",  NP, corr))).real)
     return J
 
 
-def J_2s_bar(q, FF, NP, corr):
-    return(((beta_l(q)**2)/4)*(np.absolute(A_ort(q,"L", FF, NP, corr))**2+ np.absolute(A_par(q,"L", FF, NP, corr))**2 + np.absolute(A_ort(q,"R", FF, NP, corr))**2+ np.absolute(A_par(q,"R" ,FF, NP, corr))**2))
+def J_2s_bar(q,  NP, corr):
+    return(((beta_l(q)**2)/4)*(np.absolute(A_ort(q,"L",  NP, corr))**2+ np.absolute(A_par(q,"L",  NP, corr))**2 + np.absolute(A_ort(q,"R",  NP, corr))**2+ np.absolute(A_par(q,"R" , NP, corr))**2))
 
-def J_2c_bar(q, FF, NP, corr):
-    return(-(beta_l(q)**2)*(np.absolute(A_0(q, "L", FF, NP, corr))**2 + np.absolute(A_0(q, "R", FF, NP, corr))**2))
+def J_2c_bar(q,  NP, corr):
+    return(-(beta_l(q)**2)*(np.absolute(A_0(q, "L",  NP, corr))**2 + np.absolute(A_0(q, "R",  NP, corr))**2))
 
-def J_5_bar(q, FF, NP, corr):
-    return(np.sqrt(2)*beta_l(q)*((A_ort(q,"L", FF, NP, corr)*np.conj(A_0(q,"L", FF, NP, corr))).real-(A_ort(q,"R", FF, NP, corr)*np.conj(A_0(q,"R", FF, NP, corr))).real))
+def J_5_bar(q,  NP, corr):
+    return(np.sqrt(2)*beta_l(q)*((A_ort(q,"L",  NP, corr)*np.conj(A_0(q,"L",  NP, corr))).real-(A_ort(q,"R",  NP, corr)*np.conj(A_0(q,"R",  NP, corr))).real))
 
 
-def DecayRate(q, FF, NP):
-    gamma = 3*(2*J_1s(q, FF, NP)+J_1c(q, FF, NP))/4. - (2*J_2s(q, FF, NP)+J_2c(q, FF, NP))/4.
+def DecayRate(q,  NP, corr):
+    gamma = 3*(2*J_1s(q,  NP, corr)+J_1c(q,  NP, corr))/4. - (2*J_2s(q,  NP, corr)+J_2c(q,  NP, corr))/4.
     return gamma
 
 
-def DecayRate_bar(q, FF, NP):
-    gamma = 3*(2*J_1s_bar(q, FF, NP) + J_1c_bar(q, FF, NP))/4. - \
-          (2*J_2s_bar(q, FF, NP) + J_2c_bar(q, FF, NP))/4.
+def DecayRate_bar(q,  NP, corr):
+    gamma = 3*(2*J_1s_bar(q,  NP, corr) + J_1c_bar(q,  NP, corr))/4. - \
+          (2*J_2s_bar(q,  NP, corr) + J_2c_bar(q,  NP, corr))/4.
     return gamma
 
 
-def S5(q, FF, NP):
-    return((J_5_bar(q, FF, NP) + J_5(q, FF, NP))/(DecayRate(q, FF, NP) + DecayRate_bar(q, FF, NP)))
+def S5(q,  NP, corr):
+    return((J_5_bar(q,  NP, corr) + J_5(q,  NP, corr))/(DecayRate(q,  NP, corr) + DecayRate_bar(q,  NP, corr)))
 
 
-def FL(q, FF, NP):
-    con = (np.absolute(A_0(q, "L", FF, NP))**2 + \
-           np.absolute(A_0(q, "R", FF, NP))**2)/(np.absolute(A_0(q, "L", FF, NP))**2 + \
-                                             np.absolute(A_0(q, "R", FF, NP))**2 + \
-                                             np.absolute(A_par(q, "L", FF, NP))**2 + \
-                                             np.absolute(A_par(q, "R", FF, NP))**2 + \
-                                             np.absolute(A_ort(q, "L", FF, NP))**2 + \
-                                             np.absolute(A_ort(q, "R", FF, NP))**2)
+def FL(q,  NP, corr):
+    con = (np.absolute(A_0(q, "L",  NP, corr))**2 + \
+           np.absolute(A_0(q, "R",  NP, corr))**2)/(np.absolute(A_0(q, "L",  NP, corr))**2 + \
+                                             np.absolute(A_0(q, "R",  NP, corr))**2 + \
+                                             np.absolute(A_par(q, "L",  NP, corr))**2 + \
+                                             np.absolute(A_par(q, "R",  NP, corr))**2 + \
+                                             np.absolute(A_ort(q, "L",  NP, corr))**2 + \
+                                             np.absolute(A_ort(q, "R",  NP, corr))**2)
     return con
 
 
-def P_5_p(q, FF, NP):
-    return(S5(q, FF, NP)/(np.sqrt(FL(q, FF, NP)*(1-FL(q, FF, NP)))))
+def P_5_p(q,  NP, corr):
+    return(S5(q,  NP, corr)/(np.sqrt(FL(q,  NP, corr)*(1-FL(q,  NP, corr)))))
 
 
 ###############################################################################
@@ -368,35 +416,55 @@ bins_lim = np.array([0.1])
 for i in range(len(bins)):
     bins_lim = np.append(bins_lim, bins[i][1])
 
+    '''
+results=[]
+#for bin in range(len(bins)):
+ #   min=bins[bin][0]
+  #  max=bins[bin][1]
+   # P5p = integrate.quad(P_5_p, min, max, args=(SM_WC, corr))
+   # results.append(P5p)
 
-    
+#print(res)
+results_plt=np.array(results)
+results_plt= np.append(results_plt, -1)
+'''
 
-def c_4(q, FF, NP):
-    c4 = (1.-FL(q, FF, NP))*(DecayRate(q, FF, NP) + \
-                              DecayRate_bar(q, FF, NP))
+def c_4(q,  NP, corr):
+    c4 = (1.-FL(q, NP, corr))*(DecayRate(q, NP, corr) + \
+                              DecayRate_bar(q, NP, corr))
     return c4
-def c_0(q, FF, NP):
-    return( DecayRate(q, FF, NP) + DecayRate_bar(q, FF, NP))
-def J_5_(q, FF, NP):
-    return(J_5(q, FF, NP) + J_5_bar(q, FF, NP))
+def c_0(q,  NP, corr):
+    return( DecayRate(q, NP, corr) + DecayRate_bar(q, NP, corr))
+def J_5_(q,  NP, corr):
+    return(J_5(q,  NP, corr) + J_5_bar(q,  NP, corr))
+
 
 results_SM = []
-results_NP = [] #central values
+#results_NP = [] #central values
 for bin in range(len(bins)):
     min=bins[bin][0]
     max=bins[bin][1]
-    J5_bin_np = integrate.quad(J_5_, min, max, args=(FormFac, NP_WC))
-    c_0_bin_np = integrate.quad(c_0, min, max, args=(FormFac, NP_WC))
-    c_4_bin_np = integrate.quad(c_4, min, max, args=(FormFac, NP_WC))
-    P_5p_bin_np = J5_bin_np[0]/np.sqrt(c_4_bin_np[0] * (c_0_bin_np[0]-c_4_bin_np[0]))
-    results_NP.append(P_5p_bin_np)
-    J5_bin_sm = integrate.quad(J_5_, min, max, args=(FormFac, SM_WC))
-    c_0_bin_sm = integrate.quad(c_0, min, max, args=(FormFac, SM_WC))
-    c_4_bin_sm = integrate.quad(c_4, min, max, args=(FormFac, SM_WC))
+    #J5_bin_np = integrate.quad(J_5_, min, max, args=( NP_WC))
+    #c_0_bin_np = integrate.quad(c_0, min, max, args=(NP_WC))
+    #c_4_bin_np = integrate.quad(c_4, min, max, args=(NP_WC))
+    #P_5p_bin_np = J5_bin_np[0]/np.sqrt(c_4_bin_np[0] * (c_0_bin_np[0]-c_4_bin_np[0]))
+    #results_NP.append(P_5p_bin_np)
+    J5_bin_sm = integrate.quad(J_5_, min, max, args=( SM_WC, corr))
+   # print(J5_bin_sm)
+    c_0_bin_sm = integrate.quad(c_0, min, max, args=( SM_WC, corr))
+    #print(c_0_bin_sm)
+    c_4_bin_sm = integrate.quad(c_4, min, max, args=( SM_WC, corr))
+    #print(c_4_bin_sm)
     P_5p_bin_sm = J5_bin_sm[0]/np.sqrt(c_4_bin_sm[0] * (c_0_bin_sm[0]-c_4_bin_sm[0]))
     results_SM.append(P_5p_bin_sm)                              
-print('SM values= ', results_SM, '\n', 'NP values= ', results_NP)
+#print('SM values= ', results_SM)# '\n', 'NP values= ', results_NP)
 
+
+res_plt_sm = np.array(results_SM)
+res_plt_sm = np.append(res_plt_sm, -1)
+
+
+'''
 #max values
 results_max_SM=[]
 results_max_NP=[]
@@ -442,13 +510,31 @@ res_plt_min_sm=np.array(results_min_SM)
 res_plt_min_sm= np.append(res_plt_min_sm, -1)
 res_plt_min_np=np.array(results_min_NP)
 res_plt_min_np= np.append(res_plt_min_np, -1)
+'''
 
+'''
 bins.tolist() #needed for Flavio th-prediction
 bins=[tuple(entry) for entry in bins]
+
+axes = plt.gca()
+axes.set_xlim([0, 6.1])
+axes.set_ylim([-1.6, 1])
+plt.step( bins_lim, res_plt_sm,
+          'c', where='post', label='SM')
+
+fpl.bin_plot_th( '<P5p>(B0->K*mumu)', bins,
+                 label='SM-th-Flavio', divide_binwidth=False,
+                 N=50,threads=2)
+
+plt.legend()
+plt.show()
+
+'''
 
 ###############################################################################
 # BIN PLOT with ERROR BARS (coming only from FF)
 
+'''
 rc('font',**{'family':'serif','serif':['Palatino']})
 rc('text', usetex=True)
 
@@ -502,43 +588,3 @@ plt.show()
 
 '''
 
-
-# Integreted  P_5_p
-
-'''
-bins = np.array([[0.1, 2.0], [2.0, 4.3], [4.3, 6]])
-bins_lim = np.array([0.1])
-for i in range(len(bins)):
-    bins_lim = np.append(bins_lim, bins[i][1])
-
-
-
-results = []
-for bin in range(len(bins)):
-    min=bins[bin][0]
-    max=bins[bin][1]
-    P_5_p_bin_sm = integrate.quad(P_5_p, min, max, args=(FormFac, SM_WC))
-    results.append(P_5_p_bin_sm[0])
-results_plt=np.array(results)
-results_plt=np.append(results_plt, -1)
-
-print(results_plt)
-
-
-
-bins.tolist() #needed for Flavio th-prediction
-bins=[tuple(entry) for entry in bins]
-
-axes = plt.gca()
-axes.set_xlim([0, 6.1])
-axes.set_ylim([-1.6, 1])
-plt.step( bins_lim, results_plt,
-          'c', where='post', label='SM')
-
-fpl.bin_plot_th( '<P5p>(B0->K*mumu)', bins,
-                 label='SM-th-Flavio', divide_binwidth=False,
-                 N=50,threads=2)
-
-plt.legend()
-plt.show()
-'''
