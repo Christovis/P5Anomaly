@@ -11,13 +11,19 @@ from matplotlib import rc
 ###############################################################################
 # Define Parameters
 m_l= 0. #lepton mass (muon mass =0.10565 GeV)
-m_b= 4.8 #GeV from 1207.2753 pg.13
-m_c= 1.5
+m_b= 4.6 #+- 0.1 GeV from 1207.2753 pg.13
+m_c= 1.4 #+- 0.2
+mu_b= 4.8
 m_B= 5.27950 #GeV from 1207.2753 pg.13
 m_Ks= 0.895 #GeV from 1207.2753 pg.13
-m_b_hat=m_b/m_B
-m_Ks_hat= m_Ks/m_B
+mu_h=2.2
+f_B=180 #+-30 MeV
+f_Ks= 225 # +-
+lambda_B_p= 3 (+- 1 GeV**-1)
+C_F=4/3
 
+alpha_s_h=
+alpha_s_b=
 alpha_em= 1/128 #at m_Z +- 0.0007
 V_tbV_ts= 0.0428
 G_f= 1.166378* 10**(-5) #GeV**-2
@@ -68,19 +74,72 @@ FormFacmin = {'F_0' : [0.294 , 0.246 , 0.399],
 
 #ksi parameters
 
-ksi_ort_0 = 0.118 # +- 0.008 (Straub et. al.)
-ksi_par_0 = 0.266 # +- 0.032 (same)
+ksi_ort_0 = 0.35  # +- 0.008 (Straub et. al.)
+ksi_par_0 = 2* m_Ks* 0.47 /m_B # +- 0.032 (same)
 
-###############################################################################
 
-#In the low q regime (q<< m_B^2) we have: NB we use q in place of q^2.
 
 def E_Ks(q):
     return ((m_B/2) * (1- (q/(m_B**2))))
 
-def s_hat(q):
-    return(q/(m_B**2))
-   
+
+# O(alpha_s) and O(Lambda/m_b) corrections
+
+Lmb_corr_par= { 'V'  : [0.,     0.,    0.],  # a_F, b_F, c_F in KMPW scheme from arXiv 1407.8526v2
+               'A0' : [0.002, 0.590, 1.473],
+               'A1' : [-0.013, -0.056, 0.158],
+               'A2' : [-0.018, -0.105, 0.192],
+               'T1' : [-0.006, -0.012, -0.034],
+               'T2' : [-0.005, 0.153, 0.544],
+               'T3' : [-0.002, 0.308, 0.786]}
+
+res = []
+
+def Delta_lmb(q, par):
+    for i in ['V', 'A0', 'A1', 'A2', 'T1', 'T2', 'T3']:
+        val = par[i][0] + par[i][1]*(q/m_B**2) + par[i][2]*(q**2/m_B**4)
+        res.append(val)
+    return(res)
+
+def L(q):
+    return(- 2*E_Ks(q)/(m_B-2*E_Ks(q)) * np.log*(2*E_Ks(q)/m_B))
+
+def Delta(q):
+    return(1 +  alpha_s_b *C_F/(4*np.pi)*(-2 + 2*L(q)) - alpha_s_b*C_F*2*q/E_Ks(q)**2 /(np.pi) *\
+           np.pi**2 * m_Ks*f_B*f_Ks*lambda_B_p/ (3*m_B*E_Ks(q)*ksi_par(q)) * factor)
+
+
+def Delta_V(q):
+    return(0.)
+
+def Delta_A1(q):
+    return(0.)
+
+def Deltra_A2(q):
+    return(0.)
+
+def Delta_A0(q):
+    return((E_Ks(q)/m_Ks)*ksi_par(q)*(1/Delta(q) - 1))
+
+def Delta_T1(q):
+    return(C_F*alpha_s*ksi_ort(q)*(np.log(m_b**2/mu_b**2) - L(q)) +\
+           C_F*alpha_s_b*deltaT1(q)  )
+
+def Delta_T2(q):
+    return(C_F*alpha_s*2*E_Ks(q)/(m_B)*ksi_ort(q)*(np.log(m_b**2/mu_b**2) - L(q)) +\
+           C_F*alpha_s_h*deltaT2(q)  )
+
+def Delta_T3(q):
+    return(C_F*alpha_s*(ksi_ort(q)*(np.log(m_b**2/mu_b**2) - L(q)) -\
+                        ksi_par(q)(np.log(m_b**2/mu_b**2) + 2*L(q))) +\
+           C_F*alpha_s_h*deltaT3(q)  )
+
+'''
+###############################################################################
+
+#In the low q regime (q<< m_B^2) we have: NB we use q in place of q^2.
+
+
 ###Functions needed for C9_eff
 
 def h(q, m):
@@ -101,28 +160,6 @@ def Y(q, m_b, m_c):
           1/2*(h(q, 0)*(C3 + 4/3*C4 + 16*C5 + 64/3*C6)) + \
           4/3*C3 + 64/9*C5 + 64/27*C6
     return con
-
-
-
-###From factors: central, min and max values
-
-def V(q, FF):  
-    V = FF['F_0'][2] * np.exp(FF['c1'][2]*s_hat(q) + \
-                              FF['c2'][2]*s_hat(q)**2 + \
-                              FF['c3'][2]*s_hat(q)**3)
-    return V
-
-def A_1(q, FF): 
-    A = FF['F_0'][0] * np.exp(FF['c1'][0]*s_hat(q) + \
-                              FF['c2'][0]*s_hat(q)**2 + \
-                              FF['c3'][0]*s_hat(q)**3)
-    return A
-
-def A_2(q, FF): 
-    A = FF['F_0'][1] * np.exp(FF['c1'][1]*s_hat(q) + \
-                              FF['c2'][1]*s_hat(q)**2 + \
-                              FF['c3'][1]*s_hat(q)**3)
-    return A
 
 
 
@@ -463,7 +500,7 @@ plt.show()
 
 
 
-
+'''
 
 
 # Integreted  P_5_p
