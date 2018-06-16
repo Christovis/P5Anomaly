@@ -311,12 +311,6 @@ def A_0(q, chir, NP, corr, complex):
     else:
         print("Invalid chirality argument")
 
-
-#print(A_ort(2, 'L', SM_WC, corr))
-#print(A_par(2, 'L', SM_WC, corr))
-#print(A_0(2, 'L', SM_WC, corr))
-        
-
         
 def A_t(q,  NP, corr, complex):
     res =( (N(q)*np.sqrt(lmb(q)))/np.sqrt(q) * (2* C10+ NP['dC10'])*A0(q,  corr, complex))
@@ -422,9 +416,6 @@ def S2_c(q, NP, corr):
 def FL(q,  NP, corr):
     return (- S2_c(q, NP, corr))
 
-Decay = (DecayRate(2,  SM_WC, corr, 'real') + DecayRate(2,  SM_WC, corr, 'bar'))
-print(Decay, FL(2, SM_WC, corr))
-
 def P_5_p(q,  NP, corr):
     return(S5(q,  NP, corr)/(np.sqrt(FL(q,  NP, corr)*(1-FL(q,  NP, corr)))))
 
@@ -449,9 +440,6 @@ def c_0(q,  NP, corr):
 def J_5_(q,  NP, corr):
     return(J_5(q,  NP, corr, 'real') + J_5(q,  NP, corr, 'bar'))
 
-
-
-#print(c_4(2, SM_WC, corr), c_0(2, SM_WC, corr), J_5_(2, SM_WC, corr))
 
 results_SM = []
 #results_NP = [] #central values
