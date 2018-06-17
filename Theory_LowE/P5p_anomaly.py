@@ -14,18 +14,18 @@ from matplotlib import rc
 
 m_l= 0. #lepton mass (muon mass =0.10565 GeV)
 
-mass = {'m_b'  : 5, #+- 0.1 GeV from 1207.2753 pg.13
-        'm_c'  : 1.5, #+- 0.2
-        'mu_b' : 4.8,
-        'm_B'  : 5.27950, #GeV from 1207.2753 pg.13
-        'm_Ks' : 0.895}  #GeV from 1207.2753 pg.13
+m_b = 5 #+- 0.1 GeV from 1207.2753 pg.13
+m_c = 1.5 #+- 0.2
+mu_b = 4.8
+m_B = 5.27950 #GeV from 1207.2753 pg.13
+m_Ks = 0.895  #GeV from 1207.2753 pg.13
 
 #Form Factor parameters
 
-FF_par ={'f_B'        : 0.200,   # +-30 MeV
-         'f_Ks'       : 0.220,   # +-30 MeV
-         'f_Ks_ort'   : 0.163,
-         'lambda_B_p' : 3}       # (+- 1 GeV**-1)
+f_B = 0.200  # +-30 MeV
+f_Ks =  0.220   # +-30 MeV
+f_Ks_ort = 0.163
+lambda_B_p = 3      # (+- 1 GeV**-1)
 
 
 C_F=4/3
@@ -37,15 +37,15 @@ G_f= 1.166378 * 10**(-5) #GeV**-2
 
 # WC  taken from Ali, Ball et.al., at scale= m_b= 4.8 Gev.
 
-SM_WC = {'C1'     : -0.248,
-         'C2'     : 1.108,  #121
-         'C3'     : -0.005,
-         'C4'     : -0.078,
-         'C5'     : 0.000, 
-         'C6'     : 0.001, 
-         'C7_eff' : -0.365,   #339 
-         'C9'     : 4.334,        #314
-         'C10'    : -4.513}      #503
+C1 =  -0.248
+C2 = 1.108  #121
+C3 =  -0.005
+C4 = -0.078
+C5 = 0.000 
+C6 = 0.001 
+C7_eff = -0.365   #339 
+C9 = 4.334        #314
+C10 = -4.513      #503
 
 
 # Adding NP Wilson Coefficients
@@ -53,6 +53,9 @@ NP_WC = { 'dC7'  : 0.1,
           'dC9'  : 0.1,
           'dC10' : 0.1}
 
+SM_WC = { 'dC7'  : 0.,
+          'dC9'  : 0.,
+          'dC10' : 0.}
 
 
 def E_Ks(q):
@@ -444,35 +447,35 @@ def J_5_(q,  NP, corr):
 
 
 results_SM = []
-#results_NP = [] #central values
+results_NP = [] #central values
 
 for bin in range(len(bins)):
     min=bins[bin][0]
     max=bins[bin][1]
-    #J5_bin_np = integrate.quad(J_5_, min, max, args=( NP_WC))
-    #c_0_bin_np = integrate.quad(c_0, min, max, args=(NP_WC))
-    #c_4_bin_np = integrate.quad(c_4, min, max, args=(NP_WC))
-    #P_5p_bin_np = J5_bin_np[0]/np.sqrt(c_4_bin_np[0] * (c_0_bin_np[0]-c_4_bin_np[0]))
-    #results_NP.append(P_5p_bin_np)
+    J5_bin_np = integrate.quad(J_5_, min, max, args=( NP_WC, corr))
+    c0_bin_np = integrate.quad(c_0, min, max, args=(NP_WC, corr))
+    c_4_bin_np = integrate.quad(c_4, min, max, args=(NP_WC, corr))
+    P_5p_bin_np = J5_bin_np[0]/np.sqrt(c_4_bin_np[0] * (c0_bin_np[0]-c_4_bin_np[0]))
+    results_NP.append(P_5p_bin_np)
     J5_bin_sm = integrate.quad(J_5_, min, max, args=( SM_WC, corr))
-   # print(J5_bin_sm)
     c0_bin_sm = integrate.quad(c_0, min, max, args=( SM_WC, corr))
-    #print(c_0_bin_sm)
     c_4_bin_sm = integrate.quad(c_4, min, max, args=( SM_WC, corr))
-    #print(c_4_bin_sm)
     P_5p_bin_sm = J5_bin_sm[0]/np.sqrt( c_4_bin_sm[0] * (c0_bin_sm[0]-c_4_bin_sm[0]) )
     results_SM.append(P_5p_bin_sm)                              
-print('SM values= ', results_SM)# '\n', 'NP values= ', results_NP)
+print('SM values= ', results_SM, '\n', 'NP values= ', results_NP)
 
 
 res_plt_sm = np.array(results_SM)
 res_plt_sm = np.append(res_plt_sm, -1)
+res_plt_np = np.array(results_NP)
+res_plt_np = np.append(res_plt_np, -1)
 
 
 
 bins.tolist() #needed for Flavio th-prediction
 bins=[tuple(entry) for entry in bins]
 
+'''
 axes = plt.gca()
 axes.set_xlim([0, 6.1])
 axes.set_ylim([-1.6, 1])
@@ -486,12 +489,11 @@ fpl.bin_plot_th( '<P5p>(B0->K*mumu)', bins,
 plt.legend()
 plt.show()
 
-
+'''
 
 ###############################################################################
 # BIN PLOT with ERROR BARS (coming only from FF)
 
-'''
 rc('font',**{'family':'serif','serif':['Palatino']})
 rc('text', usetex=True)
 
@@ -502,19 +504,20 @@ for i in range(len(bins)):
     label= 'SM'
     if i>0:
        label=None
-    ax.add_patch(patches.Rectangle((bins[i][0], res_plt_min_sm[i]),
+    ax.add_patch(patches.Rectangle((bins[i][0], (res_plt_sm[i]-0.01)),
                                    bins[i][1]-bins[i][0],           # width
-                                   res_plt_max_sm[i]-res_plt_min_sm[i],   # height
-                                   ec='m', fc='m', lw=True,
+                                   (res_plt_sm[i]+0.01)-(res_plt_sm[i]-0.01),   # height
+                                   ec='c', fill= False, lw=True, hatch= 'o',
                                    label=label, capstyle= 'butt'))
+
 for i in range(len(bins)):
     label= 'NP'
     if i>0:
        label=None
-    ax.add_patch(patches.Rectangle((bins[i][0], res_plt_min_np[i]),
+    ax.add_patch(patches.Rectangle((bins[i][0], res_plt_np[i]),
                                    bins[i][1]-bins[i][0],           # width
-                                   res_plt_max_np[i]-res_plt_min_np[i],   # height
-                                   ec='c', fc='c', lw=True,
+                                   (res_plt_np[i]+0.01)-res_plt_np[i],   # height
+                                   ec='y', fill= False, lw=True, hatch = 'x',
                                    label=label, capstyle= 'butt'))
 
 # Falvio experimental data
@@ -529,9 +532,9 @@ fpl.bin_plot_exp('<P5p>(B0->K*mumu)',
                  include_measurements=measur)
 
 # Flavio theoretical prediction
-fpl.bin_plot_th( '<P5p>(B0->K*mumu)', bins,
-                 label='SM-th-Flavio', divide_binwidth=False,
-                 N=50,threads=2)
+#fpl.bin_plot_th( '<P5p>(B0->K*mumu)', bins,
+#                 label='SM-th-Flavio', divide_binwidth=False,
+#                 N=50,threads=2)
 
 plt.xlabel('$q^2 \hspace{2pt} (GeV^2)$')
 plt.ylabel('$P5 \hspace{2pt} (q^2)$')
@@ -541,7 +544,6 @@ plt.show()
 #plt.ylim(-1.2, 0.7)
 #plt.savefig('Fig1_NewP5.png', bbox_inches='tight')
 
-'''
 
 
 
