@@ -8,48 +8,50 @@ import flavio
 import flavio.plots as fpl
 from matplotlib import rc
 
-###############################################################################
-# Define Parameters
-m_l= 0. #lepton mass (muon mass =0.10565 GeV)
-m_b= 5 #+- 0.1 GeV from 1207.2753 pg.13
-m_c= 1.5 #+- 0.2
-mu_b= 4.8
-m_B= 5.27950 #GeV from 1207.2753 pg.13
-m_Ks= 0.895 #GeV from 1207.2753 pg.13
-mu_h= 2.2
-f_B = 0.200 #+-30 MeV
-f_Ks = 0.220 # +-
-f_Ks_ort= 0.163
-lambda_B_p= 3 # (+- 1 GeV**-1)
-C_F=4/3
+###############################################################
 
-alpha_s_h= 0.25
+# Define Parameters
+
+m_l= 0. #lepton mass (muon mass =0.10565 GeV)
+
+mass = {'m_b'  : 5, #+- 0.1 GeV from 1207.2753 pg.13
+        'm_c'  : 1.5, #+- 0.2
+        'mu_b' : 4.8,
+        'm_B'  : 5.27950, #GeV from 1207.2753 pg.13
+        'm_Ks' : 0.895}  #GeV from 1207.2753 pg.13
+
+#Form Factor parameters
+
+FF_par ={'f_B'        : 0.200,   # +-30 MeV
+         'f_Ks'       : 0.220,   # +-30 MeV
+         'f_Ks_ort'   : 0.163,
+         'lambda_B_p' : 3}       # (+- 1 GeV**-1)
+
+
+C_F=4/3
+alpha_s_h= 0.250
 alpha_s_b= 0.214
 alpha_em= 1/128 #at m_Z +- 0.0007
 V_tbV_ts= 0.0385
 G_f= 1.166378 * 10**(-5) #GeV**-2
 
 # WC  taken from Ali, Ball et.al., at scale= m_b= 4.8 Gev.
-C1 = -0.248
-C2 = 1.108  #121
-C3 = -0.005
-C4 = -0.078
-C5 = 0.000 
-C6 = 0.001 
-C7_eff = -0.365   #339 
-C9 = 4.334        #314
-C10 = -4.513      #503
+
+SM_WC = {'C1'     : -0.248,
+         'C2'     : 1.108,  #121
+         'C3'     : -0.005,
+         'C4'     : -0.078,
+         'C5'     : 0.000, 
+         'C6'     : 0.001, 
+         'C7_eff' : -0.365,   #339 
+         'C9'     : 4.334,        #314
+         'C10'    : -4.513}      #503
 
 
 # Adding NP Wilson Coefficients
-NP_WC = { 'dC7' : 0.1,
-          'dC9' : 0.1,
+NP_WC = { 'dC7'  : 0.1,
+          'dC9'  : 0.1,
           'dC10' : 0.1}
-
-# SM only case
-SM_WC = { 'dC7' : 0.,
-          'dC9' : 0.,
-          'dC10' : 0.}
 
 
 
@@ -423,8 +425,8 @@ def P_5_p(q,  NP, corr):
 ###############################################################################
 # Run Experiment (Finding the integrated values)
 
-bins = np.array([[0.1, 2.0], [2.0, 4.3], [4.3, 6]])
-bins_lim = np.array([0.1])
+bins = np.array([[.1, 2.0], [2.0, 4.3], [4.3, 6]])
+bins_lim = np.array([.1])
 for i in range(len(bins)):
     bins_lim = np.append(bins_lim, bins[i][1])
 
