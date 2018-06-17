@@ -30,15 +30,15 @@ V_tbV_ts= 0.0385
 G_f= 1.166378 * 10**(-5) #GeV**-2
 
 # WC  taken from Ali, Ball et.al., at scale= m_b= 4.8 Gev.
-C1 = -0.275
-C2 = 1.121
+C1 = -0.248
+C2 = 1.108  #121
 C3 = -0.005
 C4 = -0.078
-C5 = 0.000
-C6 = 0.001
-C7_eff = -0.339
-C9 = 4.314
-C10 = -4.503
+C5 = 0.000 
+C6 = 0.001 
+C7_eff = -0.365   #339 
+C9 = 4.334        #314
+C10 = -4.513      #503
 
 
 # Adding NP Wilson Coefficients
@@ -458,7 +458,7 @@ for bin in range(len(bins)):
     #print(c_0_bin_sm)
     c_4_bin_sm = integrate.quad(c_4, min, max, args=( SM_WC, corr))
     #print(c_4_bin_sm)
-    P_5p_bin_sm = J5_bin_sm[0]/np.sqrt( c_4_bin_sm[0] * (c_0_bin_sm[0]-c_4_bin_sm[0]) )
+    P_5p_bin_sm = J5_bin_sm[0]/np.sqrt( c_4_bin_sm[0] * (c0_bin_sm[0]-c_4_bin_sm[0]) )
     results_SM.append(P_5p_bin_sm)                              
 print('SM values= ', results_SM)# '\n', 'NP values= ', results_NP)
 
