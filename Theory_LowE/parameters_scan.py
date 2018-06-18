@@ -21,7 +21,7 @@ def scan(traj):
 
 # create an environment
 env = Environment()
-# gety the trajectory from the environment
+# get the trajectory from the environment
 traj = env.traj
 # Add parameters
 traj.f_add_parameter('m_b',  1., comment = 'First dimension')
@@ -38,18 +38,25 @@ traj.f_explore(cartesian_product ({'m_b' : [4.6, 4.8 , 5.],
                                    'C10' : [-4.321, -4.513, -4.666]}))
 
 result=env.run(scan)
+print(result[0][1][1])
+
+#Max_values=[]
+#Min_values=[]
+res = []
 #for i in range(len(result)):
- #   print('%i run: ' %i ,result[i][1])
+ #   res.append(result[i][1][2]) # list of all second bin results
+#Max = max(res)
+#Min = min(res)
+#Max_values.append(Max)
+#Min_values.append(Min)
+#print('Max value: ', Max_values, '\n' , 'Min value: ',  Min_values)
+
 
 
 '''
- res_plt_sm = np.array(P5p_anomaly.results_SM)
-    res_plt_sm = np.append(P5p_anomaly.res_plt_sm, -1)
-    #res_plt_np = np.array(results_NP)
+   #res_plt_np = np.array(results_NP)
     #res_plt_np = np.append(res_plt_np, -1)
     
-    bins.tolist() #needed for Flavio th-prediction
-    bins=[tuple(entry) for entry in bins]
     
     
     axes = plt.gca()
@@ -66,19 +73,23 @@ result=env.run(scan)
     plt.show()
 '''
 
-
-
-
-
-
 '''
-
 ###############################################################################
 # BIN PLOT with ERROR BARS (coming only from FF)
 
 rc('font',**{'family':'serif','serif':['Palatino']})
 rc('text', usetex=True)
 
+bins=[(0.1, 2.0), (2.0, 4.3), (4.3, 6.0)]
+#bins.tolist() #needed for Flavio th-prediction
+bins=[tuple(entry) for entry in bins]
+   
+
+Max_plt = np.array(Max_values)
+Max_plt = np.append(Max_plt, -1)
+Min_plt = np.array(Min_values)
+Min_plt = np.append(Min_plt, -1)
+ 
 ax=plt.gca()
 ax.set_xlim([0, 6.1])
 ax.set_ylim([-1, 1.])
@@ -86,12 +97,13 @@ for i in range(len(bins)):
     label= 'SM'
     if i>0:
        label=None
-    ax.add_patch(patches.Rectangle((bins[i][0], (res_plt_sm[i]-0.01)),
-                                   bins[i][1]-bins[i][0],           # width
-                                   (res_plt_sm[i]+0.01)-(res_plt_sm[i]-0.01),   # height
-                                   ec='c', fill= False, lw=True, hatch= 'o',
+    ax.add_patch(patches.Rectangle((bins[i][0], Min_plt[i]),
+                                   bins[i][1]-bins[i][0],          # width
+                                   Max_plt[i]-Min_plt[i],   # height
+                                   ec='#EB70AA', fill= False, lw=True, hatch= 'o',
                                    label=label, capstyle= 'butt'))
-
+'''
+'''
 for i in range(len(bins)):
     label= 'NP'
     if i>0:
@@ -101,7 +113,7 @@ for i in range(len(bins)):
                                    (res_plt_np[i]+0.01)-res_plt_np[i],   # height
                                    ec='y', fill= False, lw=True, hatch = 'x',
                                    label=label, capstyle= 'butt'))
-
+'''
 # Falvio experimental data
 measur=['LHCb B->K*mumu 2015 P 0.1-0.98',
         'LHCb B->K*mumu 2015 P 1.1-2.5',
@@ -109,7 +121,7 @@ measur=['LHCb B->K*mumu 2015 P 0.1-0.98',
         'LHCb B->K*mumu 2015 P 4-6']
         #'ATLAS B->K*mumu 2017 P5p' ]
 fpl.bin_plot_exp('<P5p>(B0->K*mumu)',
-                 col_dict= {'ATLAS': 'y', 'LHCb': 'g'},
+                 col_dict= {'ATLAS': 'c', 'LHCb': 'm'},
                  divide_binwidth=False,
                  include_measurements=measur)
 
@@ -126,4 +138,3 @@ plt.show()
 #plt.ylim(-1.2, 0.7)
 #plt.savefig('Fig1_NewP5.png', bbox_inches='tight')
 
-'''
