@@ -28,6 +28,7 @@ f_Ks_ort = 0.163
 lambda_B_p = 3      # (+- 1 GeV**-1)
 
 
+
 C_F=4/3
 alpha_s_h= 0.250
 alpha_s_b= 0.214
@@ -428,6 +429,7 @@ def P_5_p(q,  NP, corr):
 ###############################################################################
 # Run Experiment (Finding the integrated values)
 
+
 bins = np.array([[.1, 2.0], [2.0, 4.3], [4.3, 6]])
 bins_lim = np.array([.1])
 for i in range(len(bins)):
@@ -445,106 +447,25 @@ def c_0(q,  NP, corr):
 def J_5_(q,  NP, corr):
     return(J_5(q,  NP, corr, 'real') + J_5(q,  NP, corr, 'bar'))
 
+def P5p_binned():
+    results_SM = []
+    #results_NP = [] #central values
+    for bin in range(len(bins)):
+        min=bins[bin][0]
+        max=bins[bin][1]
+        # J5_bin_np = integrate.quad(J_5_, min, max, args=( NP_WC, corr))
+        # c0_bin_np = integrate.quad(c_0, min, max, args=(NP_WC, corr))
+        # c_4_bin_np = integrate.quad(c_4, min, max, args=(NP_WC, corr))
+        # P_5p_bin_np = J5_bin_np[0]/np.sqrt(c_4_bin_np[0] * (c0_bin_np[0]-c_4_bin_np[0]))
+        # results_NP.append(P_5p_bin_np)
+        J5_bin_sm = integrate.quad(J_5_, min, max, args=( SM_WC, corr))
+        c0_bin_sm = integrate.quad(c_0, min, max, args=( SM_WC, corr))
+        c_4_bin_sm = integrate.quad(c_4, min, max, args=( SM_WC, corr))
+        P_5p_bin_sm = J5_bin_sm[0]/np.sqrt( c_4_bin_sm[0] * (c0_bin_sm[0]-c_4_bin_sm[0]))
+        results_SM.append(P_5p_bin_sm)
+    return results_SM    
 
-results_SM = []
-results_NP = [] #central values
-
-for bin in range(len(bins)):
-    min=bins[bin][0]
-    max=bins[bin][1]
-    J5_bin_np = integrate.quad(J_5_, min, max, args=( NP_WC, corr))
-    c0_bin_np = integrate.quad(c_0, min, max, args=(NP_WC, corr))
-    c_4_bin_np = integrate.quad(c_4, min, max, args=(NP_WC, corr))
-    P_5p_bin_np = J5_bin_np[0]/np.sqrt(c_4_bin_np[0] * (c0_bin_np[0]-c_4_bin_np[0]))
-    results_NP.append(P_5p_bin_np)
-    J5_bin_sm = integrate.quad(J_5_, min, max, args=( SM_WC, corr))
-    c0_bin_sm = integrate.quad(c_0, min, max, args=( SM_WC, corr))
-    c_4_bin_sm = integrate.quad(c_4, min, max, args=( SM_WC, corr))
-    P_5p_bin_sm = J5_bin_sm[0]/np.sqrt( c_4_bin_sm[0] * (c0_bin_sm[0]-c_4_bin_sm[0]) )
-    results_SM.append(P_5p_bin_sm)                              
-print('SM values= ', results_SM, '\n', 'NP values= ', results_NP)
-
-
-res_plt_sm = np.array(results_SM)
-res_plt_sm = np.append(res_plt_sm, -1)
-res_plt_np = np.array(results_NP)
-res_plt_np = np.append(res_plt_np, -1)
-
-
-
-bins.tolist() #needed for Flavio th-prediction
-bins=[tuple(entry) for entry in bins]
-
-'''
-axes = plt.gca()
-axes.set_xlim([0, 6.1])
-axes.set_ylim([-1.6, 1])
-plt.step( bins_lim, res_plt_sm,
-          'c', where='post', label='SM')
-
-fpl.bin_plot_th( '<P5p>(B0->K*mumu)', bins,
-                 label='SM-th-Flavio', divide_binwidth=False,
-                 N=50,threads=2)
-
-plt.legend()
-plt.show()
-
-'''
-
-###############################################################################
-# BIN PLOT with ERROR BARS (coming only from FF)
-
-rc('font',**{'family':'serif','serif':['Palatino']})
-rc('text', usetex=True)
-
-ax=plt.gca()
-ax.set_xlim([0, 6.1])
-ax.set_ylim([-1, 1.])
-for i in range(len(bins)):
-    label= 'SM'
-    if i>0:
-       label=None
-    ax.add_patch(patches.Rectangle((bins[i][0], (res_plt_sm[i]-0.01)),
-                                   bins[i][1]-bins[i][0],           # width
-                                   (res_plt_sm[i]+0.01)-(res_plt_sm[i]-0.01),   # height
-                                   ec='c', fill= False, lw=True, hatch= 'o',
-                                   label=label, capstyle= 'butt'))
-
-for i in range(len(bins)):
-    label= 'NP'
-    if i>0:
-       label=None
-    ax.add_patch(patches.Rectangle((bins[i][0], res_plt_np[i]),
-                                   bins[i][1]-bins[i][0],           # width
-                                   (res_plt_np[i]+0.01)-res_plt_np[i],   # height
-                                   ec='y', fill= False, lw=True, hatch = 'x',
-                                   label=label, capstyle= 'butt'))
-
-# Falvio experimental data
-measur=['LHCb B->K*mumu 2015 P 0.1-0.98',
-        'LHCb B->K*mumu 2015 P 1.1-2.5',
-        'LHCb B->K*mumu 2015 P 2.5-4',
-        'LHCb B->K*mumu 2015 P 4-6']
-        #'ATLAS B->K*mumu 2017 P5p' ]
-fpl.bin_plot_exp('<P5p>(B0->K*mumu)',
-                 col_dict= {'ATLAS': 'y', 'LHCb': 'g'},
-                 divide_binwidth=False,
-                 include_measurements=measur)
-
-# Flavio theoretical prediction
-#fpl.bin_plot_th( '<P5p>(B0->K*mumu)', bins,
-#                 label='SM-th-Flavio', divide_binwidth=False,
-#                 N=50,threads=2)
-
-plt.xlabel('$q^2 \hspace{2pt} (GeV^2)$')
-plt.ylabel('$P5 \hspace{2pt} (q^2)$')
-plt.legend()
-plt.title('$P_5\'$ prediction with $ (\delta C_7, \delta C_9, \delta C_{10}) = (.1, .1, .1)$')
-plt.show()
-#plt.ylim(-1.2, 0.7)
-#plt.savefig('Fig1_NewP5.png', bbox_inches='tight')
-
-
+#print('SM values= ', results_SM)#, '\n', 'NP values= ', results_NP)
 
 
 
