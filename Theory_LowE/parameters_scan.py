@@ -13,6 +13,10 @@ import P5p_anomaly
 def scan(traj):
     P5p_anomaly.m_b=traj.m_b
     P5p_anomaly.m_c=traj.m_c
+    P5p_anomaly.C2=traj.C2
+    P5p_anomaly.C7_eff=traj.C7
+    P5p_anomaly.C9=traj.C9
+    P5p_anomaly.C10=traj.C10
     return P5p_anomaly.P5p_binned()
 
 # create an environment
@@ -20,14 +24,22 @@ env = Environment()
 # gety the trajectory from the environment
 traj = env.traj
 # Add parameters
-traj.f_add_parameter('m_b',  5., comment = 'First dimension')
-traj.f_add_parameter('m_c',  1.5, comment = 'Second dimension')
+traj.f_add_parameter('m_b',  1., comment = 'First dimension')
+traj.f_add_parameter('m_c',  1., comment = 'Second dimension')
+traj.f_add_parameter('C2',  1., comment = 'Third dimension')
+traj.f_add_parameter('C7',  1., comment = 'Fourth dimension')
+traj.f_add_parameter('C9',  1., comment = 'Fifth dimension')
+traj.f_add_parameter('C10',  1., comment = 'Sixt dimension')
 traj.f_explore(cartesian_product ({'m_b' : [4.6, 4.8 , 5.],
-                                   'm_c' : [1.3, 1.5, 1.6]}))
+                                   'm_c' : [1.3, 1.5, 1.6],
+                                   'C2' : [1.106, 1.108, 1.09],
+                                   'C7' : [-0.378, -0.365, -0.351],
+                                   'C9' : [4.111, 4.334, 4.550],
+                                   'C10' : [-4.321, -4.513, -4.666]}))
 
 result=env.run(scan)
-for i in range(len(result)):
-    print('%i run: ' %i ,result[i][1])
+#for i in range(len(result)):
+ #   print('%i run: ' %i ,result[i][1])
 
 
 '''
