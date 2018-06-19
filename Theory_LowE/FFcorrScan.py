@@ -15,45 +15,52 @@ def scan(traj):
     P5p_anomaly.ksi_par_0=traj.ksi_par
     return P5p_anomaly.P5p_binned()
 
-# create an environment
+# Create an environment
 env = Environment()
-# get the trajectory from the environment
+# Get the trajectory from the environment
 traj = env.traj
 # Add parameters
 traj.f_add_parameter('ksi_ort',  1., comment = 'First dimension')
 traj.f_add_parameter('ksi_par',  1., comment = 'Second dimension')
-traj.f_explore(cartesian_product ({'ksi_ort' : [0.234, 0.266 , 0.298 ],
-                                   'ksi_par' : [0.11, 0.118, 0.126]}))
+traj.f_explore(cartesian_product ({'ksi_ort' : [0.234, 0.298 ],
+                                   'ksi_par' : [0.11, 0.126]}))
 
-#result=env.run(scan)
-Result = result
-#print(Result[0][1][0])
+#Result=env.run(scan)
+#print(Result)
 
-res=[]
-#Max_values=[]
-#Min_values=[]
 '''
-for j in range(3):
+# Find the maximum and minimum value for each bin
+res=[]
+Max_values=[]
+Min_values=[]
+
+for j in range(4):
     for i in range(len(Result)):
         res.append(Result[i][1][j])
     Max_values.append(max(res))
     Min_values.append(min(res))
     res=[]
+print('Maximum: ', Max_values, ' \n', 'Minimum: ', Min_values)
+''' 
+
+ 
 '''
-#SM_res = [0.4714213878670856, -0.37291853867782426, -0.8540693764591013]
-#for i in range(len(Max_values)):
-#    err_max = np.absolute(np.absolute(Max_values[i]) - np.absolute(SM_res[i]))
-#    err_min = np.absolute(SM_res[i] - Min_values[i]) 
-#    print('central: ', SM_res[i], 'Max', err_max, ' ', 'Min',  err_min)
+# Find Error bars
+SM_res =  [0.5716204647754459, 0.34299911889060947, -0.3275793047847024, -0.8343368925949862]
+for i in range(len(Max_values)):
+    err_max = np.absolute(Max_values[i] - SM_res[i])
+    err_min = np.absolute(SM_res[i] - Min_values[i]) 
+    print(i, 'bin: ' , SM_res[i], '+', err_max, ' ', '-',  err_min)
+'''
 
 
-###############################################################################
-# BIN PLOT with ERROR BARS (coming only from FF)
 
+'''
+# Bin Plot with error bars
 rc('font',**{'family':'serif','serif':['Palatino']})
 rc('text', usetex=True)
 
-bins=[(0.1, 2.0), (2.0, 4.3), (4.3, 6.0)]
+bins=[(0.1, 0.9),(0.9, 2), (2.0, 4.3), (4.3, 6.0)]
 #bins.tolist() #needed for Flavio th-prediction
 bins=[tuple(entry) for entry in bins]
    
@@ -101,3 +108,13 @@ plt.show()
 #plt.ylim(-1.2, 0.7)
 #plt.savefig('Fig1_NewP5.png', bbox_inches='tight')
 
+'''
+
+
+
+''' Error Bars
+0 bin:  0.5716204647754459 + 0.008681364191847507   - 0.0085393517181096
+1 bin:  0.34299911889060947 + 0.03602236264148162   - 0.03460051629548194
+2 bin:  -0.3275793047847024 + 0.08869328664709589   - 0.07449009578687388
+3 bin:  -0.8343368925949862 + 0.041669609816346265   - 0.0285560102959862
+'''
