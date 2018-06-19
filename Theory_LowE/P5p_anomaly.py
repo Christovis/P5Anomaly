@@ -8,45 +8,36 @@ import flavio
 import flavio.plots as fpl
 from matplotlib import rc
 
-###############################################################
+#######################################################
 
-# Define Parameters
+# Define Parameters------------------------
 
 m_l= 0. #lepton mass (muon mass =0.10565 GeV)
-
-m_b = 5 #+- 0.1 GeV from 1207.2753 pg.13
+m_b = 4.2 #+- 0.1 GeV from 1207.2753 pg.13
 m_c = 1.3 #+- 0.2
 mu_b = 4.8
 m_B = 5.27950 #GeV from 1207.2753 pg.13
 m_Ks = 0.895  #GeV from 1207.2753 pg.13
 
-#Form Factor parameters
-
-f_B = 0.200  # +-30 MeV
-f_Ks =  0.220   # +-30 MeV
-f_Ks_ort = 0.163
-lambda_B_p = 3      # (+- 1 GeV**-1)
-
-
 
 C_F=4/3
-alpha_s_h= 0.250
+alpha_s_h= 0.214
 alpha_s_b= 0.214
-alpha_em= 1/128 #at m_Z +- 0.0007
+alpha_em= 1/137 #at m_Z +- 0.0007
 V_tbV_ts= 0.0385
 G_f= 1.166378 * 10**(-5) #GeV**-2
 
 # WC  taken from Ali, Ball et.al., at scale= m_b= 4.8 Gev.
 
-C1 =  -0.248
-C2 = 1.108  #121
+C1 =  -0.257 #248
+C2 = 1.009  #108
 C3 =  -0.005
 C4 = -0.078
 C5 = 0.000 
 C6 = 0.001 
-C7_eff = -0.365   #339 
-C9 = 4.334        #314
-C10 = -4.513      #503
+C7_eff = -0.314 #365 
+C9 = 4.079      #334
+C10 = -4.308     #513
 
 
 # Adding NP Wilson Coefficients
@@ -57,6 +48,15 @@ NP_WC = { 'dC7'  : 0.1,
 SM_WC = { 'dC7'  : 0.,
           'dC9'  : 0.,
           'dC10' : 0.}
+
+
+#Form Factor parameters-------------------
+
+f_B = 0.180  # +-30 MeV
+f_Ks =  0.225   # +-30 MeV
+f_Ks_ort = 0.185
+lambda_B_p = 3      # (+- 1 GeV**-1)
+
 
 
 def E_Ks(q):
@@ -79,7 +79,7 @@ def ksi_par(q):
     return( ksi_par_0*(1/(1-q/(m_B**2)))**3 )
 
 
-# NLO formfactors corrections parameters
+# formfactor corrections parameters
 
 
 #O(Lambda/m_b) corrections
@@ -96,7 +96,7 @@ res = []
 
 def Delta_lmb(q, par):
     for i in ['V', 'A1', 'A2', 'A0', 'T1', 'T2', 'T3']:
-        val = par[i][0] + par[i][1]*(q/m_B**2) + par[i][2]*(q**2/m_B**4)
+        val = par[i][0] + par[i][1]*(q/(m_B**2)) + par[i][2]*(q**2/(m_B**4))
         res.append(val)
     return(res)
 
@@ -104,22 +104,22 @@ def Delta_lmb(q, par):
 # O(alpha_s) corrections
 
 a_FF_par = { 'a_par' : [ 0.03, 0.08, -0.03, 0.08], #a_1_par and a_2_par for K_bar and K decays
-             'a_ort' : [ 0.03, 0.08, -0.03, 0.08]}         #  from arXiv 9805422v2
+             'a_ort' : [ 0.03, 0.08, -0.03, 0.08]}      #  from arXiv 9805422v2
 
 
 def Phi_par(u, par, complex):
     i = 0
     if complex == 'bar':
         i = 2
-    return(6*u*(1-u)*(1 + 3*par['a_par'][0+i]*(2*u-1) +\
-                      par['a_par'][1+i]*3/2 * (5*(2*u-1)**2-1) ))
+    return((6*u*(1-u)*(1 + 3*par['a_par'][0+i]*(2*u-1) +\
+                       par['a_par'][1+i]*3/2 * (5*(2*u-1)**2-1) ))/(1-u) )
    
 def Phi_ort(u, par, complex):
     i = 0
     if complex == 'bar':
         i = 2
-    return(6*u*(1-u)*(1 + 3*par['a_ort'][0+i]*(2*u-1) +\
-                      par['a_ort'][1+i]*3/2 * (5*(2*u-1)**2-1) ))
+    return((6*u*(1-u)*(1 + 3*par['a_ort'][0+i]*(2*u-1) +\
+                       par['a_ort'][1+i]*3/2 * (5*(2*u-1)**2-1) ))/(1-u))
 
 
 def factor_par(complex):
@@ -137,13 +137,13 @@ def deltaF_ort(complex):
 
 
 def deltaT1(q, complex):
-    return( m_B/(4*E_Ks(q)) * deltaF_par(complex))
+    return( m_B/(4*E_Ks(q)) * deltaF_ort(complex))
 
 def deltaT2(q, complex):
     return( 1/2 * deltaF_ort(complex))
 
 def deltaT3(q, complex):
-    return( deltaT1(q, complex) + 2*m_Ks/m_B*(m_B/(2*E_Ks(q)))**2 * deltaF_par(complex))
+    return( deltaT1(q, complex) + 2*m_Ks/(m_B)*(m_B/(2*E_Ks(q)))**2 * deltaF_par(complex))
 
 
 def L(q):
@@ -155,7 +155,7 @@ def Delta(q, complex):
     return(1 +  alpha_s_b *C_F/(4*np.pi) * (-2 + 2*L(q)) -\
            alpha_s_b*C_F*2*q/((E_Ks(q)**2)*(np.pi)) *\
            np.pi**2 * m_Ks*f_B * f_Ks * lambda_B_p/ \
-           (3*m_B*E_Ks(q)*ksi_par(q))* factor_par(complex)[0])
+           (3*m_B*E_Ks(q)*ksi_par(q)) * factor_par(complex)[0])
 
 def Delta_V(q):
     return(0.)
@@ -466,3 +466,21 @@ def P5p_binned():
     return results_SM    
 
 print('SM values= ', P5p_binned())
+
+bins.tolist() #needed for Flavio th-prediction
+bins=[tuple(entry) for entry in bins]
+
+res = np.array(P5p_binned())
+res = np.append(res, -1)
+axes = plt.gca()
+axes.set_xlim([0, 6.1])
+axes.set_ylim([-1.6, 1])
+plt.step( bins_lim, res,
+              'c', where='post', label='SM')
+    
+fpl.bin_plot_th( '<P5p>(B0->K*mumu)', bins,
+                 label='SM-th-Flavio', divide_binwidth=False,
+                 N=50,threads=2)
+
+plt.legend()
+plt.show()
