@@ -35,8 +35,8 @@ C3 =  -0.005
 C4 = -0.078
 C5 = 0.000 
 C6 = 0.001 
-C7_eff = -0.314 #365 
-C9 = 4.079      #334
+C7_eff = -0.317  #365 
+C9 = 4.100      #334
 C10 = -4.308     #513
 
 
@@ -93,7 +93,6 @@ Lmb_corr_par= { 'V'  : [0.,     0.,    0.],  # a_F, b_F, c_F in KMPW scheme from
                'T3' : [-0.002, 0.308, 0.786]}
 
 res = []
-
 def Delta_lmb(q, par):
     for i in ['V', 'A1', 'A2', 'A0', 'T1', 'T2', 'T3']:
         val = par[i][0] + par[i][1]*(q/(m_B**2)) + par[i][2]*(q**2/(m_B**4))
@@ -430,7 +429,7 @@ def P_5_p(q,  NP, corr):
 # Run Experiment (Finding the integrated values)
 
 
-bins = np.array([[.1, 2.0], [2.0, 4.3], [4.3, 6]])
+bins = np.array([[.1, 0.9],[0.9, 2], [2.0, 4.3], [4.3, 6]])
 bins_lim = np.array([.1])
 for i in range(len(bins)):
     bins_lim = np.append(bins_lim, bins[i][1])
@@ -464,7 +463,7 @@ def P5p_binned():
         P_5p_bin_sm = J5_bin_sm[0]/np.sqrt( c_4_bin_sm[0] * (c0_bin_sm[0]-c_4_bin_sm[0]))
         results_SM.append(P_5p_bin_sm)
     return results_SM    
-
+'''
 print('SM values= ', P5p_binned())
 
 bins.tolist() #needed for Flavio th-prediction
@@ -484,3 +483,4 @@ fpl.bin_plot_th( '<P5p>(B0->K*mumu)', bins,
 
 plt.legend()
 plt.show()
+'''
