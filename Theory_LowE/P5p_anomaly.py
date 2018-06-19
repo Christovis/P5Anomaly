@@ -15,7 +15,7 @@ from matplotlib import rc
 m_l= 0. #lepton mass (muon mass =0.10565 GeV)
 
 m_b = 5 #+- 0.1 GeV from 1207.2753 pg.13
-m_c = 1.5 #+- 0.2
+m_c = 1.3 #+- 0.2
 mu_b = 4.8
 m_B = 5.27950 #GeV from 1207.2753 pg.13
 m_Ks = 0.895  #GeV from 1207.2753 pg.13
@@ -68,8 +68,8 @@ def E_Ks(q):
 
 #ksi parameters
 
-ksi_ort_0 = 0.35  # +- 0.008 (Straub et. al.)
-ksi_par_0 = 2 * m_Ks*0.47/m_B # +- 0.032 (same)
+ksi_ort_0 = 0.266  # +- 0.032 (Straub et. al.)
+ksi_par_0 = 0.118 # +- 0.008 (same)
 
 def ksi_ort(q):  #from arXiv hep-ph/0106067v2
     return( ksi_ort_0*(1/(1 - q/(m_B**2) )))
@@ -465,4 +465,4 @@ def P5p_binned():
         results_SM.append(P_5p_bin_sm)
     return results_SM    
 
-#print('SM values= ', results_SM)#, '\n', 'NP values= ', results_NP)
+print('SM values= ', P5p_binned())
