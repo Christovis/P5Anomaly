@@ -1,6 +1,0 @@
-2018-06-21 13:55:11,772 pypet.storageservice.HDF5StorageService INFO     I will use the hdf5 file `/Users/marialaurapiscopo/Desktop/Project/IPPP-group-project/P5Anomaly/Theory_LowE/hdf5/trajectory.hdf5`.
-2018-06-21 13:55:11,777 pypet.environment.Environment INFO     Environment initialized.
-2018-06-21 13:55:13,474 pypet.environment.Environment INFO     I am preparing the Trajectory for the experiment and initialise the store.
-2018-06-21 13:55:13,490 pypet.environment.Environment INFO     Initialising the storage for the trajectory.
-2018-06-21 13:55:13,527 pypet.storageservice.HDF5StorageService INFO     Initialising storage or updating meta data of Trajectory `trajectory`.
-2018-06-21 13:55:13,531 pypet.storageservice.HDF5StorageService ERROR    Failed storing `Trajectory trajectory (len:4): (config: <class 'pypet.naturalnaming.ConfigGroup'>), (parameters: <class 'pypet.naturalnaming.ParameterGroup'>)`

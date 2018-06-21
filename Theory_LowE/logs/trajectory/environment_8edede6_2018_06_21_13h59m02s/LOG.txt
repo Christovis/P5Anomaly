@@ -1,3 +1,0 @@
-2018-06-21 13:59:02,807 pypet.storageservice.HDF5StorageService INFO     I will use the hdf5 file `/Users/marialaurapiscopo/Desktop/Project/IPPP-group-project/P5Anomaly/Theory_LowE/hdf5/trajectory.hdf5`.
-2018-06-21 13:59:02,809 pypet.storageservice.HDF5StorageService INFO     You specified ``overwrite_file=True``, so I deleted the file `/Users/marialaurapiscopo/Desktop/Project/IPPP-group-project/P5Anomaly/Theory_LowE/hdf5/trajectory.hdf5`.
-2018-06-21 13:59:02,811 pypet.environment.Environment INFO     Environment initialized.
