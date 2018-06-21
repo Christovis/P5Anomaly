@@ -14,8 +14,8 @@ from matplotlib import rc
 
 m_l= 0. #lepton mass (muon mass =0.10565 GeV)
 m_b = 4.2 #+- 0.1 GeV from 1207.2753 pg.13
-m_c = 1.5 #+- 0.2
-mu_b = 4.8
+m_c = 1.3 #+- 0.2
+mu_b = 4.
 m_B = 5.27950 #GeV from 1207.2753 pg.13
 m_Ks = 0.895  #GeV from 1207.2753 pg.13
 
@@ -27,17 +27,17 @@ alpha_em= 1/137 #at m_Z +- 0.0007
 V_tbV_ts= 0.0385
 G_f= 1.166378 * 10**(-5) #GeV**-2
 
-# WC  arXiv:1606.00916v2 at scale= m_b= 4.8 Gev.
+# WC  arXiv:1606.00916v2 at scale= m_b= 4.2 Gev.
 
-C1 =  -0.264 #257
-C2 = 1.015  #109
+C1 =  -0.294 #257
+C2 = 1.017  #109
 C3 =  -0.005
-C4 = -0.008
+C4 = -0.08
 C5 = 0.000 
-C6 = 0.000 
-C7_eff = -0.291  #317 
-C9 = 4.053      #100
-C10 = -4.189     #308
+C6 = 0.001 
+C7_eff = -0.295  #317 
+C9 = 4.114      #100
+C10 = -4.193     #308
 
 
 # Adding NP Wilson Coefficients
@@ -101,11 +101,11 @@ def Delta_lmb(q, par):
 
 # O(alpha_s) corrections
 
-a_FF_par = { 'a_par' : [ 0.03, 0.08, -0.03, 0.08], #a_1_par and a_2_par for K_bar and K decays
-             'a_ort' : [ 0.03, 0.08, -0.03, 0.08]}      #  from arXiv 9805422v2
+a_FF_par = { 'a_par' : [ 0.17, 0.05, -0.17, 0.05], #a_1_par and a_2_par for K_bar and K decays
+             'a_ort' : [ 0.18, 0.03, -0.18, 0.03]}      #  from arXiv 9805422v2
 
 
-def Phi_par(u, par, fun_type):
+def Phi_par(u, par, fun_type): #fun_type to distinguish between B and B_bar
     i = 0
     if fun_type == 'bar':
         i = 2
@@ -428,7 +428,7 @@ def P_5_p(q,  NP, corr):
 # Run Experiment (Finding the integrated values)
 
 
-bins = np.array([[0.1, 0.98], [1.1, 2.5], [2.5, 4.], [4., 6]])
+bins = np.array([[0.1, 0.98], [1.1, 2.5], [2.5, 4], [4, 6.]])
 bins_lim = np.array([.1])
 for i in range(len(bins)):
     bins_lim = np.append(bins_lim, bins[i][1])
@@ -447,7 +447,6 @@ def J_5_(q,  NP, corr):
 
 def P5p_binned():
     results_SM = []
-    #results_NP = [] #central values
     for bin in range(len(bins)):
         min_val=bins[bin][0]
         max_val=bins[bin][1]
@@ -478,4 +477,5 @@ fpl.bin_plot_th( '<P5p>(B0->K*mumu)', bins,
 
 plt.legend()
 plt.show()
+
 '''

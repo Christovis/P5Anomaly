@@ -19,25 +19,28 @@ env = Environment(overwrite_file=True)
 # Get the trajectory from the environment
 traj = env.traj
 # Add parameters
-traj.f_add_parameter('ksi_ort',  1., comment = 'First dimension')
-traj.f_add_parameter('ksi_par',  1., comment = 'Second dimension')
-traj.f_explore(cartesian_product ({'ksi_ort' : [0.234, 0.298 ],
-                                   'ksi_par' : [0.11, 0.126]}))
+traj.f_add_parameter('m_b',  1., comment = 'First dimension')
+traj.f_add_parameter('m_c',  1., comment = 'Second dimension')
+
+traj.f_explore(cartesian_product ({'m_b' : [4.1, 4.3 ],
+                                   'm_c' : [1.27, 1.33],
+                                   }))
+
 
 # Define the observable in the par. space
 def scan(traj):
-    P5p_anomaly.ksi_ort_0=traj.ksi_ort
-    P5p_anomaly.ksi_par_0=traj.ksi_par
+    P5p_anomaly.m_b=traj.m_b
+    P5p_anomaly.m_c=traj.m_c
     return P5p_anomaly.P5p_binned()
 
+#Result=env.run(scan)
 
 # Find the maximum and minimum value for each bin
 
 def FindMaxMin():
-    Result = env.run(scan)
-    res = []
-    Max_values = []
-    Min_values = []
+    res=[]
+    Max_values=[]
+    Min_values=[]
     for j in range(len(Result[0][1])):
         for i in range(len(Result)):
             res.append(Result[i][1][j])
@@ -46,9 +49,10 @@ def FindMaxMin():
         res=[]
     return(Max_values, Min_values)
 
+#print('Max Values: ',  FindMaxMin()[0], '\n', 'Min values: ',  FindMaxMin()[1])
 
+#print(len(Result[0][1]))
 
-#print(SM_res)
 # Find Error bars
 
 def FindErrBar():
@@ -110,7 +114,7 @@ def BinPlot():
     plt.xlabel('$q^2 \hspace{2pt} (GeV^2)$')
     plt.ylabel('$P5\' \hspace{2pt} (q^2)$')
     plt.legend()
-    plt.title('FF corrections')
+    plt.title('Parameters corrections')
     #plt.title('$P_5\'$ prediction with $ (\delta C_7, \delta C_9, \delta C_{10}) = (.1, .1, .1)$')
     plt.show()
     #plt.ylim(-1.2, 0.7)
