@@ -1,0 +1,143 @@
+###################################
+##          T3PS v1.0            ##
+###################################
+
+These are short instructions to the usage of the T3PS parameter scanner tool
+version 1.0.2. For contact and licensing information, see the end of this file.
+
+###################################
+##     Usage and Requirements    ##
+###################################
+
+T3PS already works out of box after simply extracting the .tar.gz file
+  $ tar xvfz T3PS-1.0.2.tar.gz
+  $ cd T3PS-1.0.2
+which you might have to slightly adjust depending on which version you 
+downloaded. (You probably have done this already since you are reading this.)
+
+Necessary requirements are a Python interpreter compatible with version 2.7,
+e.g. CPython 2.7 or higher or PyPy version 1.5 or higher. Currently, T3PS only
+runs on Unix-like operating systems, specifically ones that expose a fork()
+system call. However, Cygwin support is very much experimental.
+
+It can be started using Python 
+  $ python src/t3ps
+or directly 
+  $ ./src/t3ps
+if the current user has rights to execute it (execute `chmod u+x src/t3ps.py'
+if not). This will show a list of scan definition files in the current working
+directory. The list will only consist of the file `QuickStart.scan' if executed
+in the package folder after extraction.
+
+Parameter scan definitions can also be launched directly using:
+  $ ./src/t3ps QuickStart.scan
+This will show a review of the scan definition and will start the scan after
+confirmation by the user. You may wish to compare the output data stored in the
+file `QuickStart.scan.data' after completion with the sample output file
+`QuickStart.scan.data.sample' provided with the T3PS package.
+
+For more details, see the manual and command line help available through
+  $ ./src/t3ps --help
+
+If you want to properly install T3PS, you can also use
+  $ make install
+in the T3PS folder, which will ask you for an installation folder and whether
+you want to make a link to T3PS in /usr/local/bin or ~/bin. It can then be 
+started using
+  $ t3ps
+from anywhere in the file-system.
+
+Once installed this way, it can be uninstalled using:
+  $ make uninstall
+from the T3PS folder (the extracted one or the installed one).
+
+###################################
+## Files included in the Package ##
+###################################
+
+Files contained in the folder T3PS-1.0.2 as extracted above:
+* README                    - this file
+* Makefile                  - Makefile for the installation and deinstallation
+                                of T3PS
+* QuickStart.scan           - scan definition for the introductory scan as shown
+                                in the manual
+* QuickStart.function       - template file for quickstart.scan, defines the 
+                                function that is plotted/scanned
+
+Contained in subfolder src/
+* t3ps                      - the main executable script
+    
+Contained in subfolder src/processors/
+* ExampleProcessor.py       - basic example of a point processor module
+* SimpleProcessor.py        - module for handling simple command line calls and
+                                results that are simply numbers separated by
+                                some character string obtained from standard
+                                output
+* SLHAProcessor.py          - module for extracting results from a program that
+                                write SUSY Les Houches Accord (SLHA) compliant
+                                output files
+* ProcessorChain.py         - module for combining two or more of the above
+
+Contained in subfolder examples/
+* ScalarDM/                 - folder containing all files as needed and shown
+                                for the scalar dark matter example in manual
+* ChargedLeptons/           - same as above for charged lepton corrections
+                                example parameter scan
+* HiggsMass/                - same as above for maximal Higgs mass in mSUGRA
+                                example parameter scan
+
+Contained in subfolder examples/output
+* QuickStart.scan.data      - sample output of QuickStart.scan
+* ScalarDM.scan.data        - sample output of ScalarDM.scan
+* ChargedLeptons_mcmc.scan.chain.*
+                            - sample output of ChargedLeptons_mcmc.scan
+* ChargedLeptons_optimize.scan.data        
+                            - sample output of ChargedLeptons_optimize.scan
+* ChargedLeptons_scan.scan.data        
+                            - sample output of ChargedLeptons_scan.scan
+* HiggsMass_scatterscan.scan.data    
+                            - sample output of HiggsMass_scatterscan.scan
+* HiggsMass_gridscan.scan.data    
+                            - sample output of HiggsMass_gridscan.scan
+* HiggsMass_explorer.scan.data    
+                            - sample output of HiggsMass_explorer.scan
+* HiggsMass_recalc.scan.data    
+                            - sample output of HiggsMass_recalc.scan
+
+All output samples were obtained with `--randomseed 11630' and 8 concurrent
+processes running on Python 2.7.3. Note that the micrOMEGAs code used for the
+ScalarDM scan might yield slightly different results on the first run as it
+builds up its archive of used matrix elements.
+For more details on how to setup the example scans, see the SETUP file included
+in each subfolder of the `examples' folder.
+
+###################################
+##      In case of problems      ##
+###################################
+
+If you happen to encounter a problem, feel free to send an email to
+    maurervi@web.de or t3ps@projects.hepforge.org
+explaining the situation in which it occurred. We will then try to fix it as soon
+as possible. Additional useful information you might include is contained in:
+the scan definition file generating the error, the `.log' file belonging to the
+scan run in question, possibly output from T3PS running in `--debug' mode and
+enough offending data to reproduce the problem.
+
+###################################
+##            License            ##
+###################################
+
+    T3PS Copyright 2014-2016 Vinzenz Maurer
+
+    T3PS is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    T3PS is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with T3PS.  If not, see <http://www.gnu.org/licenses/>.

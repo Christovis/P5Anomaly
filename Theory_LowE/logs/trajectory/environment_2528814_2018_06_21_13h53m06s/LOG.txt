@@ -1,0 +1,82 @@
+2018-06-21 13:53:06,267 pypet.storageservice.HDF5StorageService INFO     I will use the hdf5 file `/Users/marialaurapiscopo/Desktop/Project/IPPP-group-project/P5Anomaly/Theory_LowE/hdf5/trajectory.hdf5`.
+2018-06-21 13:53:06,277 pypet.environment.Environment INFO     Environment initialized.
+2018-06-21 13:53:08,197 pypet.environment.Environment INFO     I am preparing the Trajectory for the experiment and initialise the store.
+2018-06-21 13:53:08,197 pypet.environment.Environment INFO     Initialising the storage for the trajectory.
+2018-06-21 13:53:08,223 pypet.storageservice.HDF5StorageService INFO     Initialising storage or updating meta data of Trajectory `trajectory`.
+2018-06-21 13:53:08,275 pypet.storageservice.HDF5StorageService INFO     Finished init or meta data update for `trajectory`.
+2018-06-21 13:53:08,280 pypet.environment.Environment INFO     
+************************************************************
+STARTING runs of trajectory
+`trajectory`.
+************************************************************
+
+2018-06-21 13:53:08,280 pypet INFO     PROGRESS: Finished 0/4 runs [                    ]  0.0%
+2018-06-21 13:53:08,281 pypet INFO     
+=========================================
+ Starting single run #0 of 4 
+=========================================
+
+2018-06-21 13:53:10,130 pypet INFO     
+=========================================
+ Finished single run #0 of 4 
+=========================================
+
+2018-06-21 13:53:10,130 pypet INFO     PROGRESS: Finished 1/4 runs [=====               ] 25.0%, remaining: 0:00:05
+2018-06-21 13:53:10,131 pypet INFO     
+=========================================
+ Starting single run #1 of 4 
+=========================================
+
+2018-06-21 13:53:11,992 pypet INFO     
+=========================================
+ Finished single run #1 of 4 
+=========================================
+
+2018-06-21 13:53:11,993 pypet INFO     PROGRESS: Finished 2/4 runs [==========          ] 50.0%, remaining: 0:00:03
+2018-06-21 13:53:11,993 pypet INFO     
+=========================================
+ Starting single run #2 of 4 
+=========================================
+
+2018-06-21 13:53:13,829 pypet INFO     
+=========================================
+ Finished single run #2 of 4 
+=========================================
+
+2018-06-21 13:53:13,830 pypet INFO     PROGRESS: Finished 3/4 runs [===============     ] 75.0%, remaining: 0:00:01
+2018-06-21 13:53:13,830 pypet INFO     
+=========================================
+ Starting single run #3 of 4 
+=========================================
+
+2018-06-21 13:53:15,688 pypet INFO     
+=========================================
+ Finished single run #3 of 4 
+=========================================
+
+2018-06-21 13:53:15,688 pypet INFO     PROGRESS: Finished 4/4 runs [====================]100.0%
+2018-06-21 13:53:15,692 pypet.storageservice.HDF5StorageService INFO     Initialising storage or updating meta data of Trajectory `trajectory`.
+2018-06-21 13:53:15,739 pypet.storageservice.HDF5StorageService INFO     Finished init or meta data update for `trajectory`.
+2018-06-21 13:53:15,743 pypet.environment.Environment INFO     
+************************************************************
+FINISHED all runs of trajectory
+`trajectory`.
+************************************************************
+
+2018-06-21 13:53:15,758 pypet.environment.Environment INFO     
+************************************************************
+STARTING FINAL STORING of trajectory
+`trajectory`
+************************************************************
+
+2018-06-21 13:53:15,763 pypet.storageservice.HDF5StorageService INFO     Start storing Trajectory `trajectory`.
+2018-06-21 13:53:15,802 pypet.storageservice.HDF5StorageService INFO     Storing branch `config`.
+2018-06-21 13:53:16,328 pypet.storageservice.HDF5StorageService INFO     Storing branch `parameters`.
+2018-06-21 13:53:16,369 pypet.storageservice.HDF5StorageService INFO     Finished storing Trajectory `trajectory`.
+2018-06-21 13:53:16,375 pypet.environment.Environment INFO     
+************************************************************
+FINISHED FINAL STORING of trajectory
+`trajectory`.
+************************************************************
+
+2018-06-21 13:53:16,460 pypet.environment.Environment INFO     All runs of trajectory `trajectory` were completed successfully.

@@ -13,10 +13,6 @@ import P5p_anomaly
 def scan(traj):
     P5p_anomaly.m_b=traj.m_b
     P5p_anomaly.m_c=traj.m_c
-    P5p_anomaly.mu_b=traj.mu_b
-    P5p_anomaly.C7_eff=traj.C7
-    P5p_anomaly.C9=traj.C9
-    P5p_anomaly.C10=traj.C10
     return P5p_anomaly.P5p_binned()
 
 # create an environment
@@ -26,19 +22,13 @@ traj = env.traj
 # Add parameters
 traj.f_add_parameter('m_b',  1., comment = 'First dimension')
 traj.f_add_parameter('m_c',  1., comment = 'Second dimension')
-traj.f_add_parameter('mu_b',  1., comment = 'Third dimension')
-traj.f_add_parameter('C7',  1., comment = 'Fourth dimension')
-traj.f_add_parameter('C9',  1., comment = 'Fifth dimension')
-traj.f_add_parameter('C10',  1., comment = 'Sixt dimension')
-traj.f_explore(cartesian_product ({'m_b' : [3.8, 4.6],
-                                   'm_c' : [1.27, 1.4],
-                                   'C7' : [-0.305, -0.320],
-                                   'C9' : [4.069, 4.089],
-                                   'C10' : [-4.298, -4.318]}))
+traj.f_explore(cartesian_product ({'m_b' : [4.0, 4.4],
+                                   'm_c' : [1.27, 1.4]}))
 
-result=env.run(scan)
+#result=env.run(scan)
 Results = result
-
+print(Results[:][1])
+'''
 Max_values=[]
 Min_values=[]
 res = []
@@ -52,7 +42,7 @@ for j in range(3):
     Min_values.append(Min)
 
 print('Max value: ', Max_values, '\n' , 'Min values: ',  Min_values)
-
+'''
 '''
 Err_bar_max = []
 Err_bar_min = []

@@ -14,7 +14,7 @@ from matplotlib import rc
 
 m_l= 0. #lepton mass (muon mass =0.10565 GeV)
 m_b = 4.2 #+- 0.1 GeV from 1207.2753 pg.13
-m_c = 1.3 #+- 0.2
+m_c = 1.5 #+- 0.2
 mu_b = 4.8
 m_B = 5.27950 #GeV from 1207.2753 pg.13
 m_Ks = 0.895  #GeV from 1207.2753 pg.13
@@ -27,17 +27,17 @@ alpha_em= 1/137 #at m_Z +- 0.0007
 V_tbV_ts= 0.0385
 G_f= 1.166378 * 10**(-5) #GeV**-2
 
-# WC  taken from Ali, Ball et.al., at scale= m_b= 4.8 Gev.
+# WC  arXiv:1606.00916v2 at scale= m_b= 4.8 Gev.
 
-C1 =  -0.257 #248
-C2 = 1.009  #108
+C1 =  -0.264 #257
+C2 = 1.015  #109
 C3 =  -0.005
-C4 = -0.078
+C4 = -0.008
 C5 = 0.000 
-C6 = 0.001 
-C7_eff = -0.317  #365 
-C9 = 4.100      #334
-C10 = -4.308     #513
+C6 = 0.000 
+C7_eff = -0.291  #317 
+C9 = 4.053      #100
+C10 = -4.189     #308
 
 
 # Adding NP Wilson Coefficients
@@ -52,9 +52,9 @@ SM_WC = { 'dC7'  : 0.,
 
 #Form Factor parameters-------------------
 
-f_B = 0.180  # +-30 MeV
-f_Ks =  0.225   # +-30 MeV
-f_Ks_ort = 0.185
+f_B = 0.200  # +-30 MeV
+f_Ks =  0.220   # +-30 MeV
+f_Ks_ort = 0.163
 lambda_B_p = 3      # (+- 1 GeV**-1)
 
 
@@ -64,7 +64,6 @@ def E_Ks(q):
 
 
 #Definition of the two form factors ksi.
-
 
 #ksi parameters
 
@@ -106,43 +105,43 @@ a_FF_par = { 'a_par' : [ 0.03, 0.08, -0.03, 0.08], #a_1_par and a_2_par for K_ba
              'a_ort' : [ 0.03, 0.08, -0.03, 0.08]}      #  from arXiv 9805422v2
 
 
-def Phi_par(u, par, complex):
+def Phi_par(u, par, fun_type):
     i = 0
-    if complex == 'bar':
+    if fun_type == 'bar':
         i = 2
     return((6*u*(1-u)*(1 + 3*par['a_par'][0+i]*(2*u-1) +\
                        par['a_par'][1+i]*3/2 * (5*(2*u-1)**2-1) ))/(1-u) )
    
-def Phi_ort(u, par, complex):
+def Phi_ort(u, par, fun_type):
     i = 0
-    if complex == 'bar':
+    if fun_type == 'bar':
         i = 2
     return((6*u*(1-u)*(1 + 3*par['a_ort'][0+i]*(2*u-1) +\
                        par['a_ort'][1+i]*3/2 * (5*(2*u-1)**2-1) ))/(1-u))
 
 
-def factor_par(complex):
-    return integrate.quad(Phi_par, 0, 1, args=(a_FF_par, complex))
-def factor_ort(complex):
-    return integrate.quad(Phi_ort, 0, 1, args=(a_FF_par, complex))
+def factor_par(fun_type):
+    return integrate.quad(Phi_par, 0, 1, args=(a_FF_par, fun_type))
+def factor_ort(fun_type):
+    return integrate.quad(Phi_ort, 0, 1, args=(a_FF_par, fun_type))
 
 
-def deltaF_par(complex):
-    return  8*(np.pi**2)*f_B*f_Ks/(3*m_B)*(factor_par(complex)[0]*lambda_B_p)
+def deltaF_par(fun_type):
+    return  8*(np.pi**2)*f_B*f_Ks/(3*m_B)*(factor_par(fun_type)[0]*lambda_B_p)
 
 
-def deltaF_ort(complex):
-    return 8*(np.pi**2)*f_B*f_Ks_ort/(3*m_B)*(factor_ort(complex)[0]*lambda_B_p)
+def deltaF_ort(fun_type):
+    return 8*(np.pi**2)*f_B*f_Ks_ort/(3*m_B)*(factor_ort(fun_type)[0]*lambda_B_p)
 
 
-def deltaT1(q, complex):
-    return( m_B/(4*E_Ks(q)) * deltaF_ort(complex))
+def deltaT1(q, fun_type):
+    return( m_B/(4*E_Ks(q)) * deltaF_ort(fun_type))
 
-def deltaT2(q, complex):
-    return( 1/2 * deltaF_ort(complex))
+def deltaT2(q, fun_type):
+    return( 1/2 * deltaF_ort(fun_type))
 
-def deltaT3(q, complex):
-    return( deltaT1(q, complex) + 2*m_Ks/(m_B)*(m_B/(2*E_Ks(q)))**2 * deltaF_par(complex))
+def deltaT3(q, fun_type):
+    return( deltaT1(q, fun_type) + 2*m_Ks/(m_B)*(m_B/(2*E_Ks(q)))**2 * deltaF_par(fun_type))
 
 
 def L(q):
@@ -150,11 +149,11 @@ def L(q):
 
 
 
-def Delta(q, complex):
+def Delta(q, fun_type):
     return(1 +  alpha_s_b *C_F/(4*np.pi) * (-2 + 2*L(q)) -\
            alpha_s_b*C_F*2*q/((E_Ks(q)**2)*(np.pi)) *\
            np.pi**2 * m_Ks*f_B * f_Ks * lambda_B_p/ \
-           (3*m_B*E_Ks(q)*ksi_par(q)) * factor_par(complex)[0])
+           (3*m_B*E_Ks(q)*ksi_par(q)) * factor_par(fun_type)[0])
 
 def Delta_V(q):
     return(0.)
@@ -165,21 +164,21 @@ def Delta_A1(q):
 def Delta_A2(q):
     return(0.)
 
-def Delta_A0(q, complex):
-    return((E_Ks(q)/m_Ks)*ksi_par(q)*(Delta(q, complex)**-1 - 1))
+def Delta_A0(q, fun_type):
+    return((E_Ks(q)/m_Ks)*ksi_par(q)*(Delta(q, fun_type)**-1 - 1))
 
-def Delta_T1(q, complex):
+def Delta_T1(q, fun_type):
     return(C_F*alpha_s_b*ksi_ort(q)*(np.log(m_b**2/mu_b**2) - L(q)) +\
-           C_F*alpha_s_b*deltaT1(q, complex)  )
+           C_F*alpha_s_b*deltaT1(q, fun_type)  )
 
-def Delta_T2(q, complex):
+def Delta_T2(q, fun_type):
     return(C_F*alpha_s_b*2*E_Ks(q)/(m_B)*ksi_ort(q)*(np.log(m_b**2/mu_b**2) - L(q)) +\
-           C_F*alpha_s_h*deltaT2(q, complex)  )
+           C_F*alpha_s_h*deltaT2(q, fun_type)  )
 
-def Delta_T3(q, complex):
+def Delta_T3(q, fun_type):
     return(C_F*alpha_s_b*(ksi_ort(q)*(np.log(m_b**2/mu_b**2) - L(q)) -\
                         ksi_par(q)*(np.log(m_b**2/mu_b**2) + 2*L(q))) +\
-           C_F*alpha_s_h*deltaT3(q, complex)  )
+           C_F*alpha_s_h*deltaT3(q, fun_type)  )
 
 
 corr = { 'V' : [Delta_V,  Delta_lmb ],
@@ -219,33 +218,33 @@ def Y(q, m_b, m_c):
 
 #Definition of the seven full form factors with NLO corrections
 
-def V(q, corr, complex):
+def V(q, corr, fun_type):
     return( (m_B + m_Ks)/m_B * ksi_ort(q) +\
                 corr['V'][0](q) + corr['V'][1](q, Lmb_corr_par)[0])
   
-def A1(q,  corr, complex):
+def A1(q,  corr, fun_type):
     return((2* E_Ks(q))/(m_B + m_Ks)*ksi_ort(q) +\
            corr['A1'][0](q) + corr['A1'][1](q, Lmb_corr_par)[1])
 
-def A2(q,  corr, complex):
+def A2(q,  corr, fun_type):
     return(m_B/(m_B-m_Ks)*(ksi_ort(q) - ksi_par(q)) +\
            corr['A2'][0](q) + corr['A2'][1](q, Lmb_corr_par)[2])
 
-def A0(q,  corr, complex):
+def A0(q,  corr, fun_type):
     return((E_Ks(q)/m_Ks)*ksi_par(q) +\
-           corr['A0'][0](q, complex) + corr['A0'][1](q, Lmb_corr_par)[3])
+           corr['A0'][0](q, fun_type) + corr['A0'][1](q, Lmb_corr_par)[3])
 
-def T1(q,  corr, complex):
+def T1(q,  corr, fun_type):
     return(ksi_ort(q) +\
-           corr['T1'][0](q, complex) + corr['T1'][1](q, Lmb_corr_par)[4])
+           corr['T1'][0](q, fun_type) + corr['T1'][1](q, Lmb_corr_par)[4])
 
-def T2(q,  corr, complex):
+def T2(q,  corr, fun_type):
     return((2* E_Ks(q))/m_B*ksi_ort(q) +\
-           corr['T2'][0](q, complex) + corr['T2'][1](q, Lmb_corr_par)[5])
+           corr['T2'][0](q, fun_type) + corr['T2'][1](q, Lmb_corr_par)[5])
 
-def T3(q,  corr, complex):
+def T3(q,  corr, fun_type):
     return(ksi_ort(q) - ksi_par(q) +\
-           corr['T3'][0](q, complex) + corr['T3'][1](q, Lmb_corr_par)[6])
+           corr['T3'][0](q, fun_type) + corr['T3'][1](q, Lmb_corr_par)[6])
 
 
 
@@ -265,146 +264,146 @@ def N(q):
 
 ##Amplitudes (arXiv 0807.2589v3)
 
-def A_ort(q, chir, NP, corr, complex):
+def A_ort(q, chir, NP, corr, fun_type):
     if chir == 'L':
         res = np.sqrt(2*lmb(q))*N(q) * (\
               ((C9 + NP['dC9'] + Y(q, m_b, m_c))  - (C10 + NP['dC10']) )*\
-                                        V(q,  corr, complex)/(m_B + m_Ks) + \
-                ((2*m_b)/q) * (C7_eff + NP['dC7'])*T1(q,  corr, complex))
+                                        V(q,  corr, fun_type)/(m_B + m_Ks) + \
+                ((2*m_b)/q) * (C7_eff + NP['dC7'])*T1(q,  corr, fun_type))
         return res
     elif chir == 'R':
         res = np.sqrt(2*lmb(q))*N(q) * (\
               ((C9 + NP['dC9'] + Y(q, m_b, m_c))  + (C10 + NP['dC10']) )*\
-                                        V(q,  corr, complex)/(m_B + m_Ks) + \
-                ((2*m_b)/q) * (C7_eff + NP['dC7'])*T1(q,  corr, complex))
+                                        V(q,  corr, fun_type)/(m_B + m_Ks) + \
+                ((2*m_b)/q) * (C7_eff + NP['dC7'])*T1(q,  corr, fun_type))
         return res
     else:
         print("Invalid chirality argument")
 
-def A_par(q, chir,  NP, corr, complex):
+def A_par(q, chir,  NP, corr, fun_type):
     if chir == 'L':
         res = -np.sqrt(2)*N(q)*(m_B**2 - m_Ks**2)*(\
             ( (C9 + NP['dC9'] + Y(q, m_b, m_c)) - (C10 + NP['dC10']))*\
-                                                   A1(q,  corr, complex)/(m_B - m_Ks) +\
-            ((2*m_b)/q) * (C7_eff + NP['dC7']) * T2(q,  corr, complex))
+                                                   A1(q,  corr, fun_type)/(m_B - m_Ks) +\
+            ((2*m_b)/q) * (C7_eff + NP['dC7']) * T2(q,  corr, fun_type))
         return res
     elif chir == 'R':
        res = -np.sqrt(2)*N(q)*(m_B**2 - m_Ks**2)* (\
             ((C9 + NP['dC9'] + Y(q, m_b, m_c))  + (C10 + NP['dC10']))*\
-                                                   A1(q,  corr, complex)/(m_B - m_Ks) +\
-            ((2*m_b)/q) * (C7_eff + NP['dC7']) * T2(q,  corr, complex))
+                                                   A1(q,  corr, fun_type)/(m_B - m_Ks) +\
+            ((2*m_b)/q) * (C7_eff + NP['dC7']) * T2(q,  corr, fun_type))
        return res
     else:
         print("Invalid chirality argument")
 
 
-def A_0(q, chir, NP, corr, complex):
+def A_0(q, chir, NP, corr, fun_type):
     if chir == 'L':
         res = -N(q)/(2.*m_Ks*np.sqrt(q)) * \
             ( ((C9 + NP['dC9'] + Y(q, m_b, m_c))  - (C10 + NP['dC10']))* ((m_B**2 - m_Ks**2 -q)*\
-             (m_B + m_Ks)*A1(q,  corr, complex) - lmb(q)* A2(q,  corr, complex)/(m_B + m_Ks)) +\
-             (2*m_b)*(C7_eff + NP['dC7']) * ((m_B**2 + 3*m_Ks**2-q)*T2(q,  corr, complex) -\
-                                             (lmb(q)/(m_B**2-m_Ks**2))*T3(q,  corr, complex))) 
+             (m_B + m_Ks)*A1(q,  corr, fun_type) - lmb(q)* A2(q,  corr, fun_type)/(m_B + m_Ks)) +\
+             (2*m_b)*(C7_eff + NP['dC7']) * ((m_B**2 + 3*m_Ks**2-q)*T2(q,  corr, fun_type) -\
+                                             (lmb(q)/(m_B**2-m_Ks**2))*T3(q,  corr, fun_type))) 
         return res
     elif chir == 'R':
         res = -N(q)/(2.*m_Ks*np.sqrt(q)) * \
               ( ((C9 + NP['dC9'] + Y(q, m_b, m_c)) + (C10 + NP['dC10']))* ((m_B**2 - m_Ks**2 -q)*\
-                (m_B + m_Ks)*A1(q,  corr, complex) - lmb(q)* A2(q, corr, complex)/(m_B + m_Ks)) +\
-                (2*m_b)*(C7_eff + NP['dC7']) * ((m_B**2 + 3*m_Ks**2-q)*T2(q,  corr, complex) -\
-                                                (lmb(q)/(m_B**2-m_Ks**2))*T3(q, corr, complex))) 
+                (m_B + m_Ks)*A1(q,  corr, fun_type) - lmb(q)* A2(q, corr, fun_type)/(m_B + m_Ks)) +\
+                (2*m_b)*(C7_eff + NP['dC7']) * ((m_B**2 + 3*m_Ks**2-q)*T2(q,  corr, fun_type) -\
+                                                (lmb(q)/(m_B**2-m_Ks**2))*T3(q, corr, fun_type))) 
         return res
     else:
         print("Invalid chirality argument")
 
         
-def A_t(q,  NP, corr, complex):
-    res =( (N(q)*np.sqrt(lmb(q)))/np.sqrt(q) * (2* C10+ NP['dC10'])*A0(q,  corr, complex))
+def A_t(q,  NP, corr, fun_type):
+    res =( (N(q)*np.sqrt(lmb(q)))/np.sqrt(q) * (2* C10+ NP['dC10'])*A0(q,  corr, fun_type))
     return(res)
 
 
 ###Angular obervables
-def J_1s(q,  NP, corr, complex):
-    if complex == 'bar':
-        J = ((2+beta_l(q)**2)/4.) * (np.absolute(A_ort(q, "L",  NP, corr, complex))**2 + \
-                                     np.absolute(A_par(q, "L",  NP, corr, complex))**2 + \
-                                     np.absolute(A_ort(q, "R",  NP, corr, complex))**2 + \
-                                     np.absolute(A_par(q, "R",  NP, corr, complex))**2) + \
-                                     ((4* (m_l)**2)/q) * (A_ort(q, "R",  NP, corr, complex)*\
-                                                    np.conj(A_ort(q, "L",  NP, corr, complex)) + \
-                                                        A_par(q, "R",  NP, corr, complex)*\
-                                                np.conj(A_par(q, "L",  NP, corr, complex))).real
+def J_1s(q,  NP, corr, fun_type):
+    if fun_type == 'bar':
+        J = ((2+beta_l(q)**2)/4.) * (np.absolute(A_ort(q, "L",  NP, corr, fun_type))**2 + \
+                                     np.absolute(A_par(q, "L",  NP, corr, fun_type))**2 + \
+                                     np.absolute(A_ort(q, "R",  NP, corr, fun_type))**2 + \
+                                     np.absolute(A_par(q, "R",  NP, corr, fun_type))**2) + \
+                                     ((4* (m_l)**2)/q) * (A_ort(q, "R",  NP, corr, fun_type)*\
+                                                    np.conj(A_ort(q, "L",  NP, corr, fun_type)) + \
+                                                        A_par(q, "R",  NP, corr, fun_type)*\
+                                                np.conj(A_par(q, "L",  NP, corr, fun_type))).real
         return J
     else:
-        J = ((2+beta_l(q)**2)/4.) * (np.absolute(A_ort(q, "L",  NP, corr, complex))**2 + \
-                                 np.absolute(A_par(q, "L",  NP, corr, complex))**2 + \
-                                 np.absolute(A_ort(q, "R",  NP, corr, complex))**2 + \
-                                 np.absolute(A_par(q, "R",  NP, corr, complex))**2) + \
-        ((4*(m_l**2))/q) * (A_ort(q, "L",  NP, corr, complex) *\
-                            np.conj(A_ort(q, "R",  NP, corr, complex)) +  \
-                            A_par(q, "L",  NP, corr, complex) *\
-                            np.conj(A_par(q, "R",  NP, corr, complex))).real
+        J = ((2+beta_l(q)**2)/4.) * (np.absolute(A_ort(q, "L",  NP, corr, fun_type))**2 + \
+                                 np.absolute(A_par(q, "L",  NP, corr, fun_type))**2 + \
+                                 np.absolute(A_ort(q, "R",  NP, corr, fun_type))**2 + \
+                                 np.absolute(A_par(q, "R",  NP, corr, fun_type))**2) + \
+        ((4*(m_l**2))/q) * (A_ort(q, "L",  NP, corr, fun_type) *\
+                            np.conj(A_ort(q, "R",  NP, corr, fun_type)) +  \
+                            A_par(q, "L",  NP, corr, fun_type) *\
+                            np.conj(A_par(q, "R",  NP, corr, fun_type))).real
         return J
 
 
-def J_1c(q,  NP, corr, complex):
-    if complex == 'bar':
-        J = np.absolute(A_0(q, "L",  NP, corr, complex))**2 +\
-            np.absolute(A_0(q, "R",  NP, corr, complex))**2 + \
-            (4* (m_l**2)/q)*(np.absolute(A_t(q,  NP, corr, complex))**2 + \
-                          2*(A_0(q, "R",  NP, corr, complex)*\
-                             np.conj(A_0(q,"L",  NP, corr, complex))).real)
+def J_1c(q,  NP, corr, fun_type):
+    if fun_type == 'bar':
+        J = np.absolute(A_0(q, "L",  NP, corr, fun_type))**2 +\
+            np.absolute(A_0(q, "R",  NP, corr, fun_type))**2 + \
+            (4* (m_l**2)/q)*(np.absolute(A_t(q,  NP, corr, fun_type))**2 + \
+                          2*(A_0(q, "R",  NP, corr, fun_type)*\
+                             np.conj(A_0(q,"L",  NP, corr, fun_type))).real)
         return J
     else:
-        J = np.absolute(A_0(q, "L",  NP, corr, complex))**2 +\
-            np.absolute(A_0(q, "R",  NP, corr, complex))**2 + \
-            (4*(m_l**2)/q) * (np.absolute(A_t(q,  NP, corr, complex))**2 + \
-                              2*(A_0(q, "L",  NP, corr, complex)* \
-                                 np.conj(A_0(q, "R",  NP, corr, complex))).real)
+        J = np.absolute(A_0(q, "L",  NP, corr, fun_type))**2 +\
+            np.absolute(A_0(q, "R",  NP, corr, fun_type))**2 + \
+            (4*(m_l**2)/q) * (np.absolute(A_t(q,  NP, corr, fun_type))**2 + \
+                              2*(A_0(q, "L",  NP, corr, fun_type)* \
+                                 np.conj(A_0(q, "R",  NP, corr, fun_type))).real)
         return J
   
         
 
-def J_2s(q,  NP, corr, complex):
-    if complex == 'bar':
-        return(((beta_l(q)**2)/4)*(np.absolute(A_ort(q,"L",  NP, corr, complex))**2+\
-                                   np.absolute(A_par(q,"L",  NP, corr, complex))**2 +\
-                                   np.absolute(A_ort(q,"R",  NP, corr, complex))**2+\
-                                   np.absolute(A_par(q,"R" , NP, corr, complex))**2))
+def J_2s(q,  NP, corr, fun_type):
+    if fun_type == 'bar':
+        return(((beta_l(q)**2)/4)*(np.absolute(A_ort(q,"L",  NP, corr, fun_type))**2+\
+                                   np.absolute(A_par(q,"L",  NP, corr, fun_type))**2 +\
+                                   np.absolute(A_ort(q,"R",  NP, corr, fun_type))**2+\
+                                   np.absolute(A_par(q,"R" , NP, corr, fun_type))**2))
     else:
-        J = ((beta_l(q)**2)/4) * (np.absolute(A_ort(q, "L",  NP, corr, complex))**2 + \
-                              np.absolute(A_par(q, "L",  NP, corr, complex))**2 + \
-                              np.absolute(A_ort(q, "R",  NP, corr, complex))**2 + \
-                              np.absolute(A_par(q, "R",  NP, corr, complex))**2)
+        J = ((beta_l(q)**2)/4) * (np.absolute(A_ort(q, "L",  NP, corr, fun_type))**2 + \
+                              np.absolute(A_par(q, "L",  NP, corr, fun_type))**2 + \
+                              np.absolute(A_ort(q, "R",  NP, corr, fun_type))**2 + \
+                              np.absolute(A_par(q, "R",  NP, corr, fun_type))**2)
         return J
 
 
-def J_2c(q,  NP, corr, complex):
-    if complex == 'bar':
-        return(-(beta_l(q)**2)*(np.absolute(A_0(q, "L",  NP, corr, complex))**2\
-                                + np.absolute(A_0(q, "R",  NP, corr, complex))**2))
+def J_2c(q,  NP, corr, fun_type):
+    if fun_type == 'bar':
+        return(-(beta_l(q)**2)*(np.absolute(A_0(q, "L",  NP, corr, fun_type))**2\
+                                + np.absolute(A_0(q, "R",  NP, corr, fun_type))**2))
     else: 
-        J = -(beta_l(q)**2) * (np.absolute(A_0(q, "L",  NP, corr, complex))**2 + \
-                           np.absolute(A_0(q, "R",  NP, corr, complex))**2)
+        J = -(beta_l(q)**2) * (np.absolute(A_0(q, "L",  NP, corr, fun_type))**2 + \
+                           np.absolute(A_0(q, "R",  NP, corr, fun_type))**2)
         return J
 
 
-def J_5(q,  NP, corr, complex):
-    if complex == 'bar':
-        return(np.sqrt(2)*beta_l(q)*((A_ort(q,"L",  NP, corr, complex)*\
-                                      np.conj(A_0(q,"L",  NP, corr, complex))).real- \
-                                     (A_ort(q,"R",  NP, corr, complex)*\
-                                      np.conj(A_0(q,"R",  NP, corr, complex))).real))
+def J_5(q,  NP, corr, fun_type):
+    if fun_type == 'bar':
+        return(np.sqrt(2)*beta_l(q)*((A_ort(q,"L",  NP, corr, fun_type)*\
+                                      np.conj(A_0(q,"L",  NP, corr, fun_type))).real- \
+                                     (A_ort(q,"R",  NP, corr, fun_type)*\
+                                      np.conj(A_0(q,"R",  NP, corr, fun_type))).real))
     else:
-        J = np.sqrt(2)*beta_l(q)*((A_0(q, "L",  NP, corr, complex)* \
-                                   np.conj(A_ort(q, "L",  NP, corr, complex))).real - \
-                              (A_0(q, "R",  NP, corr, complex)*\
-                               np.conj(A_ort(q, "R",  NP, corr, complex))).real)
+        J = np.sqrt(2)*beta_l(q)*((A_0(q, "L",  NP, corr, fun_type)* \
+                                   np.conj(A_ort(q, "L",  NP, corr, fun_type))).real - \
+                              (A_0(q, "R",  NP, corr, fun_type)*\
+                               np.conj(A_ort(q, "R",  NP, corr, fun_type))).real)
         return J
 
 
-def DecayRate(q,  NP, corr, complex):
-    gamma = 3*(2*J_1s(q,  NP, corr, complex)+J_1c(q,  NP, corr, complex))/ \
-            4. - (2*J_2s(q,  NP, corr, complex)+J_2c(q,  NP, corr, complex))/4.
+def DecayRate(q,  NP, corr, fun_type):
+    gamma = 3*(2*J_1s(q,  NP, corr, fun_type)+J_1c(q,  NP, corr, fun_type))/ \
+            4. - (2*J_2s(q,  NP, corr, fun_type)+J_2c(q,  NP, corr, fun_type))/4.
     return gamma
 
 
@@ -429,7 +428,7 @@ def P_5_p(q,  NP, corr):
 # Run Experiment (Finding the integrated values)
 
 
-bins = np.array([[.1, 0.9],[0.9, 2], [2.0, 4.3], [4.3, 6]])
+bins = np.array([[0.1, 0.98], [1.1, 2.5], [2.5, 4.], [4., 6]])
 bins_lim = np.array([.1])
 for i in range(len(bins)):
     bins_lim = np.append(bins_lim, bins[i][1])
@@ -450,19 +449,15 @@ def P5p_binned():
     results_SM = []
     #results_NP = [] #central values
     for bin in range(len(bins)):
-        min=bins[bin][0]
-        max=bins[bin][1]
-        # J5_bin_np = integrate.quad(J_5_, min, max, args=( NP_WC, corr))
-        # c0_bin_np = integrate.quad(c_0, min, max, args=(NP_WC, corr))
-        # c_4_bin_np = integrate.quad(c_4, min, max, args=(NP_WC, corr))
-        # P_5p_bin_np = J5_bin_np[0]/np.sqrt(c_4_bin_np[0] * (c0_bin_np[0]-c_4_bin_np[0]))
-        # results_NP.append(P_5p_bin_np)
-        J5_bin_sm = integrate.quad(J_5_, min, max, args=( SM_WC, corr))
-        c0_bin_sm = integrate.quad(c_0, min, max, args=( SM_WC, corr))
-        c_4_bin_sm = integrate.quad(c_4, min, max, args=( SM_WC, corr))
+        min_val=bins[bin][0]
+        max_val=bins[bin][1]
+        J5_bin_sm = integrate.quad(J_5_, min_val, max_val, args=( SM_WC, corr))
+        c0_bin_sm = integrate.quad(c_0, min_val, max_val, args=( SM_WC, corr))
+        c_4_bin_sm = integrate.quad(c_4, min_val, max_val, args=( SM_WC, corr))
         P_5p_bin_sm = J5_bin_sm[0]/np.sqrt( c_4_bin_sm[0] * (c0_bin_sm[0]-c_4_bin_sm[0]))
         results_SM.append(P_5p_bin_sm)
-    return results_SM    
+    return results_SM
+
 '''
 print('SM values= ', P5p_binned())
 

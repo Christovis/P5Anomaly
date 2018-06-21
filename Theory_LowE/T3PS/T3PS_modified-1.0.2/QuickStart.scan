@@ -1,0 +1,16 @@
+[setup]
+point_processor = processors/SimpleProcessor.py
+template = QuickStart.function
+
+[SimpleProcessor]
+# do a scan with the `basic calculator' 
+#  with basic mathematical functions
+program = bc --mathlib
+
+[parameter_space]
+# two parameters called x and y
+par_names = x, y
+# define each parameter to take 100 different 
+#  values going from -1 to 1
+par_x = interval(-1, 1) with count = 100
+par_y = interval(-1, 1) with count = 100
