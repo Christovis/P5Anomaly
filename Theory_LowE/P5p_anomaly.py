@@ -462,7 +462,6 @@ print('SM values= ', P5p_binned())
 
 bins.tolist() #needed for Flavio th-prediction
 bins=[tuple(entry) for entry in bins]
-
 res = np.array(P5p_binned())
 res = np.append(res, -1)
 axes = plt.gca()
@@ -477,5 +476,4 @@ fpl.bin_plot_th( '<P5p>(B0->K*mumu)', bins,
 
 plt.legend()
 plt.show()
-
 '''
