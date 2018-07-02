@@ -63,7 +63,6 @@ def P5p_SM(X, HP, WC, FF, M, Ex):
     c0_bin = integrate.quad(p5f.c_0, X[0], X[1], args=(Dicts))
     c4_bin = integrate.quad(p5f.c_4, X[0], X[1], args=(Dicts))
     P5p = p5f.P5p(J5_bin, c0_bin, c4_bin)
-    print('P5p_SM P5p', P5p)
     return P5p
 
 

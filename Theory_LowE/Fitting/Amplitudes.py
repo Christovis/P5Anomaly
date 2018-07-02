@@ -31,6 +31,7 @@ def lmb(q, m_Ks, m_B):
 
 
 def beta_l(q, m_l):
+    #print('Amplitude beta_l', q)
     return(np.sqrt(1 - (4* m_l**2)/q))
 
 
@@ -45,15 +46,18 @@ def A_ort(q, chir, Dicts, cmplx):
     # https://arxiv.org/pdf/0807.2589.pdf
     # equ. 3.7
     # Y() causes deviations to results from paper
-    HP=Dicts['HP']; FF=Dicts['FF']; M=Dicts['M']; Ex=Dicts['Ex']
+    HP=Dicts['HP']; FF=Dicts['FF']; WC=Dicts['WC']
+    M=Dicts['M']; Ex=Dicts['Ex']
     if chir == 'L':
         res = np.sqrt(2*lmb(q, M['m_Ks'], M['m_B']))*N(q, M, Ex) * \
-              ((HP['C9'] - HP['C10'])*ff.V(q, M, cmplx)/(M['m_B'] + M['m_Ks']) + \
+              ((HP['C9'] - HP['C10'] + Y(q, WC, M['m_b'], M['m_c'])) * \
+               ff.V(q, M, cmplx)/(M['m_B'] + M['m_Ks']) + \
                ((2*M['m_b'])/q)*HP['C7']*ff.T1(q, FF, M, Ex, cmplx))
         return res
     elif chir == 'R':
         res = np.sqrt(2*lmb(q, M['m_Ks'], M['m_B']))*N(q, M, Ex) * \
-              ((HP['C9'] + HP['C10'])*ff.V(q, M, cmplx)/(M['m_B'] + M['m_Ks']) + \
+              ((HP['C9'] + HP['C10'] + Y(q, WC, M['m_b'], M['m_c'])) * \
+               ff.V(q, M, cmplx)/(M['m_B'] + M['m_Ks']) + \
                ((2*M['m_b'])/q)*HP['C7']*ff.T1(q, FF, M, Ex, cmplx))
         return res
     else:
@@ -63,15 +67,18 @@ def A_ort(q, chir, Dicts, cmplx):
 def A_par(q, chir, Dicts, cmplx):
     # https://arxiv.org/pdf/0807.2589.pdf
     # equ. 3.8
-    HP=Dicts['HP']; FF=Dicts['FF']; M=Dicts['M']; Ex=Dicts['Ex']
+    HP=Dicts['HP']; FF=Dicts['FF']; WC=Dicts['WC']
+    M=Dicts['M']; Ex=Dicts['Ex']
     if chir == 'L':
         res = -np.sqrt(2)*N(q, M, Ex)*(M['m_B']**2 - M['m_Ks']**2) * \
-              ((HP['C9'] - HP['C10'])*ff.A1(q, M, cmplx)/(M['m_B'] - M['m_Ks']) + \
+              ((HP['C9'] - HP['C10'] + Y(q, WC, M['m_b'], M['m_c'])) * \
+               ff.A1(q, M, cmplx)/(M['m_B'] - M['m_Ks']) + \
               (2*M['m_b']/q)*HP['C7']*ff.T2(q, FF, M, Ex, cmplx))
         return res
     elif chir == 'R':
         res = -np.sqrt(2)*N(q, M, Ex)*(M['m_B']**2 - M['m_Ks']**2)* (\
-              (HP['C9'] + HP['C10'])*ff.A1(q, M, cmplx)/(M['m_B'] - M['m_Ks']) +\
+              (HP['C9'] + HP['C10'] + Y(q, WC, M['m_b'], M['m_c'])) * \
+               ff.A1(q, M, cmplx)/(M['m_B'] - M['m_Ks']) +\
               ((2*M['m_b'])/q) * HP['C7'] * ff.T2(q, FF, M, Ex, cmplx))
         return res
     else:
@@ -81,10 +88,11 @@ def A_par(q, chir, Dicts, cmplx):
 def A_0(q, chir, Dicts, cmplx):
     # https://arxiv.org/pdf/0807.2589.pdf
     # equ. 3.9
-    HP=Dicts['HP']; FF=Dicts['FF']; M=Dicts['M']; Ex=Dicts['Ex']
+    HP=Dicts['HP']; FF=Dicts['FF']; WC=Dicts['WC']
+    M=Dicts['M']; Ex=Dicts['Ex']
     if chir == 'L':
         res = -N(q, M, Ex)/(2.*M['m_Ks']*np.sqrt(q)) * \
-              ((HP['C9'] - HP['C10']) * \
+              ((HP['C9'] - HP['C10'] + Y(q, WC, M['m_b'], M['m_c'])) * \
                ((M['m_B']**2 - M['m_Ks']**2 - q) * \
                 (M['m_B'] + M['m_Ks'])*ff.A1(q, M, cmplx) - \
                 lmb(q, M['m_Ks'], M['m_B']) * \
@@ -96,7 +104,7 @@ def A_0(q, chir, Dicts, cmplx):
         return res
     elif chir == 'R':
         res = -N(q, M, Ex)/(2.*M['m_Ks']*np.sqrt(q)) * \
-              ((HP['C9'] + HP['C10']) * \
+              ((HP['C9'] + HP['C10'] + Y(q, WC, M['m_b'], M['m_c'])) * \
                ((M['m_B']**2 - M['m_Ks']**2 - q) * \
                 (M['m_B'] + M['m_Ks'])*ff.A1(q, M, cmplx) - \
                 lmb(q, M['m_Ks'], M['m_B']) * \
@@ -111,10 +119,8 @@ def A_0(q, chir, Dicts, cmplx):
 
         
 def A_t(q, Dicts, cmplx):
-    HP = Dicts['HP']
-    FF = Dicts['FF']
-    M = Dicts['M']
-    Ex = Dicts['Ex']
+    HP=Dicts['HP']; FF=Dicts['FF']; WC=Dicts['WC']
+    M=Dicts['M']; Ex=Dicts['Ex']
     a = N(q, M, Ex)*np.sqrt(lmb(q, M['m_Ks'], M['m_B']))/np.sqrt(q) * \
         2*HP['C10']*ff.A0(q, FF, M, Ex, cmplx)
     return a
